@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSINT AI - Recherche d'informations</title>
+    <title>OSINT Tool - Recherche d'informations réelles</title>
     <style>
         :root {
             --primary: #4a6fa5;
@@ -189,8 +189,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>OSINT AI</h1>
-            <p class="subtitle">Recherche intelligente d'informations en sources ouvertes</p>
+            <h1>OSINT Tool</h1>
+            <p class="subtitle">Recherche d'informations réelles en sources ouvertes</p>
         </header>
         
         <section class="search-section">
@@ -212,6 +212,11 @@
                     <input type="text" id="searchQuery" placeholder="Ex: +33123456789 ou example@domain.com" required>
                 </div>
                 
+                <div class="input-group">
+                    <label for="apiKey">Clé API LeakCheck (optionnelle)</label>
+                    <input type="text" id="apiKey" placeholder="Entrez votre clé API pour plus de résultats">
+                </div>
+                
                 <button type="submit">Rechercher</button>
             </form>
         </section>
@@ -224,7 +229,8 @@
             
             <div class="results-content" id="resultsContent">
                 <div id="initialMessage">
-                    <p>Entrez une recherche pour commencer. L'IA analysera les sources ouvertes et vous présentera les résultats.</p>
+                    <p>Entrez une recherche pour commencer. L'outil interrogera diverses sources ouvertes.</p>
+                    <p><strong>API intégrées :</strong> LeakCheck.io (emails), NumVerify (téléphone), IPAPI (IP), WHOIS (domaines)</p>
                 </div>
                 
                 <div id="loadingIndicator" class="loading hidden">
@@ -238,7 +244,8 @@
         </section>
         
         <footer>
-            <p>Cet outil est destiné à des fins légales et éthiques uniquement. Ne violez pas la vie privée des autres.</p>
+            <p>Cet outil est destiné à des fins légales et éthiques uniquement. Respectez toujours les lois sur la vie privée.</p>
+            <p>L'API LeakCheck.io est utilisée pour vérifier les fuites de données. Une clé API peut fournir plus de résultats.</p>
         </footer>
     </div>
 
@@ -248,6 +255,7 @@
             
             const searchType = document.getElementById('searchType').value;
             const searchQuery = document.getElementById('searchQuery').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
             
             // Show loading indicator
             document.getElementById('initialMessage').classList.add('hidden');
@@ -257,12 +265,32 @@
             document.getElementById('searchStatus').textContent = 'Recherche en cours...';
             
             try {
-                // Simulate API call (in a real app, you would call actual OSINT APIs)
-                const results = await simulateOSINTSearch(searchType, searchQuery);
+                let results = [];
+                
+                switch(searchType) {
+                    case 'phone':
+                        results = await searchPhoneNumber(searchQuery, apiKey);
+                        break;
+                    case 'email':
+                        results = await searchEmail(searchQuery, apiKey);
+                        break;
+                    case 'ip':
+                        results = await searchIP(searchQuery);
+                        break;
+                    case 'domain':
+                        results = await searchDomain(searchQuery);
+                        break;
+                    case 'username':
+                        results = await searchUsername(searchQuery);
+                        break;
+                    default:
+                        throw new Error('Type de recherche non supporté');
+                }
                 
                 displayResults(results);
                 document.getElementById('searchStatus').textContent = `Résultats trouvés: ${results.length}`;
             } catch (error) {
+                console.error('Search error:', error);
                 document.getElementById('errorMessage').textContent = `Erreur: ${error.message}`;
                 document.getElementById('errorMessage').classList.remove('hidden');
                 document.getElementById('searchStatus').textContent = 'Erreur lors de la recherche';
@@ -271,99 +299,172 @@
             }
         });
         
-        async function simulateOSINTSearch(type, query) {
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // This is a simulation - in a real app, you would integrate with actual OSINT APIs
-            // Some potential APIs to consider: Hunter.io, NumVerify, IPAPI, etc.
-            
-            if (!query || !type) {
-                throw new Error('Veuillez fournir un type de recherche et une requête valide');
-            }
-            
-            // Simulate different results based on search type
+        async function searchEmail(email, apiKey) {
             const results = [];
             
-            if (type === 'phone') {
-                if (!query.match(/^\+?[\d\s-]+$/)) {
-                    throw new Error('Numéro de téléphone invalide');
+            // 1. Vérification avec LeakCheck.io
+            try {
+                const leakCheckUrl = apiKey 
+                    ? `https://leakcheck.io/api?key=${apiKey}&check=${encodeURIComponent(email)}`
+                    : `https://leakcheck.io/api/public?check=${encodeURIComponent(email)}`;
+                
+                const leakCheckResponse = await fetch(leakCheckUrl);
+                
+                if (!leakCheckResponse.ok) {
+                    throw new Error('Erreur API LeakCheck');
                 }
                 
-                results.push({
-                    title: 'Informations sur le numéro',
-                    content: `Pays: ${getRandomCountry()}<br>Opérateur: ${getRandomCarrier()}<br>Type: ${getRandomPhoneType()}`,
-                    source: 'API NumVerify (simulée)'
-                });
+                const leakData = await leakCheckResponse.json();
                 
-                results.push({
-                    title: 'Réseaux sociaux possibles',
-                    content: `Ce numéro pourrait être associé à des comptes sur WhatsApp, Telegram et Facebook.`,
-                    source: 'API SocialScan (simulée)'
-                });
-            } 
-            else if (type === 'email') {
-                if (!query.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                    throw new Error('Adresse email invalide');
+                if (leakData.success && leakData.found > 0) {
+                    const sourcesList = leakData.sources.map(s => 
+                        `${s.name} (${s.date})`).join(', ');
+                    
+                    results.push({
+                        title: 'Fuites de données trouvées',
+                        content: `
+                            <strong>${leakData.found} fuites</strong> trouvées<br>
+                            Champs exposés: ${leakData.fields.join(', ') || 'Inconnu'}<br>
+                            Sources: ${sourcesList}
+                        `,
+                        source: 'LeakCheck.io'
+                    });
+                } else if (leakData.success) {
+                    results.push({
+                        title: 'Fuites de données',
+                        content: 'Aucune fuite trouvée pour cette adresse email',
+                        source: 'LeakCheck.io'
+                    });
                 }
-                
-                const domain = query.split('@')[1];
-                
+            } catch (e) {
+                console.warn('LeakCheck API error:', e);
                 results.push({
-                    title: 'Validation email',
-                    content: `L'adresse email est valide syntaxiquement. Statut de livraison: ${getRandomDeliveryStatus()}`,
-                    source: 'API Hunter.io (simulée)'
-                });
-                
-                results.push({
-                    title: 'Informations sur le domaine',
-                    content: `Domaine: ${domain}<br>Enregistré le: ${getRandomDate()}<br>Propriétaire: ${getRandomRegistrant()}`,
-                    source: 'API WHOIS (simulée)'
-                });
-                
-                results.push({
-                    title: 'Fuites de données',
-                    content: `Cette adresse email a été trouvée dans ${Math.floor(Math.random() * 5)} fuites de données.`,
-                    source: 'API HaveIBeenPwned (simulée)'
-                });
-            }
-            else if (type === 'username') {
-                results.push({
-                    title: 'Présence sur les réseaux sociaux',
-                    content: generateSocialMediaPresence(query),
-                    source: 'API Sherlock (simulée)'
-                });
-            }
-            else if (type === 'ip') {
-                results.push({
-                    title: 'Géolocalisation IP',
-                    content: `Pays: ${getRandomCountry()}<br>Ville: ${getRandomCity()}<br>Fournisseur: ${getRandomISP()}<br>Proxy/VPN: ${Math.random() > 0.7 ? 'Oui' : 'Non'}`,
-                    source: 'API IPAPI (simulée)'
-                });
-            }
-            else if (type === 'domain') {
-                results.push({
-                    title: 'Informations WHOIS',
-                    content: `Domaine: ${query}<br>Enregistré le: ${getRandomDate()}<br>Expire le: ${getRandomFutureDate()}<br>Propriétaire: ${getRandomRegistrant()}`,
-                    source: 'API WHOIS (simulée)'
-                });
-                
-                results.push({
-                    title: 'Sécurité du site',
-                    content: `Certificat SSL: Valide<br>Dernière analyse: ${getRandomPastDate()}<br>Malware détecté: Non`,
-                    source: 'API VirusTotal (simulée)'
+                    title: 'Erreur LeakCheck',
+                    content: 'Impossible de vérifier les fuites de données',
+                    source: 'LeakCheck.io'
                 });
             }
             
+            // 2. Validation email de base
+            results.push({
+                title: 'Validation email',
+                content: this.validateEmailSyntax(email),
+                source: 'Validation syntaxique'
+            });
+            
             if (results.length === 0) {
-                throw new Error('Aucun résultat trouvé pour cette recherche');
+                throw new Error('Aucune information trouvée pour cette adresse email');
             }
             
             return results;
         }
         
+        function validateEmailSyntax(email) {
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            return isValid 
+                ? 'Format email valide'
+                : 'Format email invalide';
+        }
+        
+        async function searchPhoneNumber(phoneNumber, apiKey) {
+            // NumVerify API (nécessite une clé API)
+            try {
+                const numVerifyApiKey = apiKey || 'YOUR_NUMVERIFY_API_KEY';
+                const response = await fetch(`https://api.numverify.com/validate?access_key=${numVerifyApiKey}&number=${encodeURIComponent(phoneNumber)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la vérification du numéro');
+                }
+                
+                const data = await response.json();
+                
+                if (!data.valid) {
+                    throw new Error('Numéro de téléphone invalide');
+                }
+                
+                return [{
+                    title: 'Informations sur le numéro',
+                    content: `
+                        Pays: ${data.country_name || 'Inconnu'}<br>
+                        Opérateur: ${data.carrier || 'Inconnu'}<br>
+                        Type: ${data.line_type || 'Inconnu'}<br>
+                        Format international: ${data.international_format || 'Inconnu'}
+                    `,
+                    source: 'API NumVerify'
+                }];
+            } catch (e) {
+                console.error('Phone search error:', e);
+                throw new Error('Impossible de vérifier le numéro de téléphone');
+            }
+        }
+        
+        async function searchIP(ipAddress) {
+            // IPAPI (géolocalisation IP)
+            try {
+                const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.reason || 'Erreur lors de la recherche IP');
+                }
+                
+                return [{
+                    title: 'Géolocalisation IP',
+                    content: `
+                        Pays: ${data.country_name} (${data.country})<br>
+                        Ville: ${data.city}<br>
+                        Région: ${data.region}<br>
+                        Code postal: ${data.postal}<br>
+                        FAI: ${data.org}<br>
+                        Fuseau horaire: ${data.timezone}
+                    `,
+                    source: 'IPAPI.co'
+                }];
+            } catch (e) {
+                console.error('IP search error:', e);
+                throw new Error('Impossible de géolocaliser cette IP');
+            }
+        }
+        
+        async function searchDomain(domain) {
+            // WHOIS lookup via whois.com
+            try {
+                return [{
+                    title: 'Informations WHOIS',
+                    content: `Les informations WHOIS complètes sont disponibles sur <a href="https://www.whois.com/whois/${domain}" target="_blank">whois.com</a>`,
+                    source: 'WHOIS.com'
+                }];
+            } catch (e) {
+                throw new Error('Impossible de récupérer les informations WHOIS');
+            }
+        }
+        
+        async function searchUsername(username) {
+            // Check various social networks
+            const socialNetworks = [
+                { name: 'Twitter', url: `https://twitter.com/${username}` },
+                { name: 'Instagram', url: `https://instagram.com/${username}` },
+                { name: 'GitHub', url: `https://github.com/${username}` },
+                { name: 'Reddit', url: `https://reddit.com/user/${username}` },
+                { name: 'Facebook', url: `https://facebook.com/${username}` }
+            ];
+            
+            return [{
+                title: 'Réseaux sociaux possibles',
+                content: socialNetworks.map(n => 
+                    `<a href="${n.url}" target="_blank" rel="noopener noreferrer">${n.name}</a>`
+                ).join(' | '),
+                source: 'Liens standards'
+            }];
+        }
+        
         function displayResults(results) {
             const container = document.getElementById('resultsContainer');
+            
+            if (results.length === 0) {
+                container.innerHTML = '<p>Aucun résultat trouvé pour cette recherche.</p>';
+                return;
+            }
             
             results.forEach(result => {
                 const card = document.createElement('div');
@@ -377,82 +478,6 @@
                 
                 container.appendChild(card);
             });
-        }
-        
-        // Helper functions for simulated data
-        function getRandomCountry() {
-            const countries = ['France', 'États-Unis', 'Allemagne', 'Royaume-Uni', 'Canada', 'Japon'];
-            return countries[Math.floor(Math.random() * countries.length)];
-        }
-        
-        function getRandomCity() {
-            const cities = ['Paris', 'New York', 'Londres', 'Tokyo', 'Berlin', 'Sydney'];
-            return cities[Math.floor(Math.random() * cities.length)];
-        }
-        
-        function getRandomCarrier() {
-            const carriers = ['Orange', 'Free Mobile', 'SFR', 'Bouygues Telecom', 'Verizon', 'AT&T'];
-            return carriers[Math.floor(Math.random() * carriers.length)];
-        }
-        
-        function getRandomPhoneType() {
-            const types = ['Mobile', 'Fixe', 'VoIP'];
-            return types[Math.floor(Math.random() * types.length)];
-        }
-        
-        function getRandomDeliveryStatus() {
-            const statuses = ['Livrable', 'Risque de spam', 'Boîte pleine', 'Inconnu'];
-            return statuses[Math.floor(Math.random() * statuses.length)];
-        }
-        
-        function getRandomDate() {
-            const start = new Date(2010, 0, 1);
-            const end = new Date();
-            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toLocaleDateString();
-        }
-        
-        function getRandomPastDate() {
-            const daysAgo = Math.floor(Math.random() * 30) + 1;
-            const date = new Date();
-            date.setDate(date.getDate() - daysAgo);
-            return date.toLocaleDateString();
-        }
-        
-        function getRandomFutureDate() {
-            const daysInFuture = Math.floor(Math.random() * 365) + 30;
-            const date = new Date();
-            date.setDate(date.getDate() + daysInFuture);
-            return date.toLocaleDateString();
-        }
-        
-        function getRandomRegistrant() {
-            const names = ['REDACTED FOR PRIVACY', 'Domain Administrator', 'Host Master', 'Contact Privacy Inc.'];
-            return names[Math.floor(Math.random() * names.length)];
-        }
-        
-        function getRandomISP() {
-            const isps = ['Orange', 'Free', 'Google Cloud', 'Amazon AWS', 'OVH', 'DigitalOcean'];
-            return isps[Math.floor(Math.random() * isps.length)];
-        }
-        
-        function generateSocialMediaPresence(username) {
-            const platforms = [
-                { name: 'Twitter', url: `https://twitter.com/${username}` },
-                { name: 'Instagram', url: `https://instagram.com/${username}` },
-                { name: 'GitHub', url: `https://github.com/${username}` },
-                { name: 'Reddit', url: `https://reddit.com/user/${username}` }
-            ];
-            
-            // Randomly remove some platforms to simulate not being everywhere
-            const presentPlatforms = platforms.filter(() => Math.random() > 0.3);
-            
-            if (presentPlatforms.length === 0) {
-                return "Aucun compte trouvé avec ce nom d'utilisateur sur les plateformes principales.";
-            }
-            
-            return presentPlatforms.map(p => 
-                `<a href="${p.url}" target="_blank" rel="noopener noreferrer">${p.name}</a>`
-            ).join(' | ');
         }
     </script>
 </body>
