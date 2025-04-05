@@ -4,35 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="OSINTool - Outil complet d'OSINT (Open Source Intelligence) pour les investigations en ligne et la collecte de données ouvertes">
-    <meta name="keywords" content="OSINT, investigation, renseignement, open source, outils, analyse, recherche">
-    <meta name="author" content="Votre Nom ou Organisation">
-    <meta name="theme-color" content="#1a237e"> <!-- Couleur pour les navigateurs mobiles -->
-    
+    <title>OSINTool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://votresite.com/">
     <meta property="og:title" content="OSINTool - Outil complet d'OSINT">
-    <meta property="og:description" content="Outil complet d'OSINT pour les investigations en ligne et la collecte de données ouvertes">
+    <meta property="og:description"
+        content="Outil complet d'OSINT pour les investigations en ligne et la collecte de données ouvertes">
     <meta property="og:image" content="https://votresite.com/images/preview.jpg">
-    
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://votresite.com/">
     <meta name="twitter:title" content="OSINTool - Outil complet d'OSINT">
-    <meta name="twitter:description" content="Outil complet d'OSINT pour les investigations en ligne et la collecte de données ouvertes">
+    <meta name="twitter:description"
+        content="Outil complet d'OSINT pour les investigations en ligne et la collecte de données ouvertes">
     <meta name="twitter:image" content="https://votresite.com/images/preview.jpg">
-    
     <!-- Sécurité -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https:;">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    
-    <title>OSINTool</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https:;">
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -69,7 +61,8 @@
 
                     <div class="input-group">
                         <label for="searchQuery"><i class="fas fa-search"></i> Entrez votre recherche</label>
-                        <input type="text" id="searchQuery" placeholder="Ex: +33123456789, example@domain.com, ou 192.168.1.1" required>
+                        <input type="text" id="searchQuery"
+                            placeholder="Ex: +33123456789, example@domain.com, ou 192.168.1.1" required>
                     </div>
 
                     <button type="submit" id="searchButton">
@@ -77,7 +70,8 @@
                     </button>
 
                     <div class="api-info">
-                        <i class="fas fa-info-circle"></i> Cet outil utilise des API publiques fiables : AbstractAPI (email/téléphone), IPGeolocation, WHOIS, et des techniques OSINT standards.
+                        <i class="fas fa-info-circle"></i> Cet outil utilise des API publiques fiables : AbstractAPI
+                        (email/téléphone), IPGeolocation, WHOIS, et des techniques OSINT standards.
                     </div>
                 </form>
 
@@ -154,168 +148,170 @@
         </main>
 
         <footer>
-            <p><i class="fas fa-shield-alt"></i> Cet outil est destiné à des fins légales et éthiques uniquement. Respectez toujours les lois sur la vie privée.</p>
-            <p style="margin-top: 0.5rem;">OSINTool v1.1 - Utilise des techniques OSINT standards et des API publiques</p>
+            <p><i class="fas fa-shield-alt"></i> Cet outil est destiné à des fins légales et éthiques uniquement.
+                Respectez toujours les lois sur la vie privée.</p>
+            <p style="margin-top: 0.5rem;">OSINTool v1.1 - Utilise des techniques OSINT standards et des API publiques
+            </p>
         </footer>
     </div>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-    // Gestion du thème
-    const themeToggle = document.getElementById('themeToggle');
-    const body = document.body;
+        document.addEventListener('DOMContentLoaded', function () {
+            // Gestion du thème
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
 
-    // Vérifier le localStorage pour le thème
-    const currentTheme = localStorage.getItem('theme') || 'light';
+            // Vérifier le localStorage pour le thème
+            const currentTheme = localStorage.getItem('theme') || 'light';
 
-    // Appliquer le thème sauvegardé
-    if (currentTheme === 'dark') {
-        body.setAttribute('data-theme', 'dark');
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-    } else {
-        body.removeAttribute('data-theme');
-        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-    }
+            // Appliquer le thème sauvegardé
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
 
-    // Basculer entre les thèmes
-    themeToggle.addEventListener('click', function () {
-        if (body.getAttribute('data-theme') === 'dark') {
-            body.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-        }
-    });
+            // Basculer entre les thèmes
+            themeToggle.addEventListener('click', function () {
+                if (body.getAttribute('data-theme') === 'dark') {
+                    body.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                }
+            });
 
-    // Gestion des onglets
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Désactiver tous les onglets et contenus
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            // Activer l'onglet cliqué
-            this.classList.add('active');
-            const tabId = this.getAttribute('data-tab');
-            document.getElementById(`${tabId}-tab`).classList.add('active');
-        });
-    });
+            // Gestion des onglets
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function () {
+                    // Désactiver tous les onglets et contenus
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-    // Gestion de l'historique des recherches
-    let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
-    const historyList = document.getElementById('historyList');
-    const clearHistoryBtn = document.getElementById('clearHistory');
+                    // Activer l'onglet cliqué
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
 
-    function updateHistoryDisplay() {
-        historyList.innerHTML = '';
-        if (searchHistory.length === 0) {
-            historyList.innerHTML = '<p style="color: var(--text); opacity: 0.7;">Aucune recherche récente</p>';
-            return;
-        }
-        
-        searchHistory.slice(0, 5).forEach(item => {
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
-            historyItem.innerHTML = `
+            // Gestion de l'historique des recherches
+            let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+            const historyList = document.getElementById('historyList');
+            const clearHistoryBtn = document.getElementById('clearHistory');
+
+            function updateHistoryDisplay() {
+                historyList.innerHTML = '';
+                if (searchHistory.length === 0) {
+                    historyList.innerHTML = '<p style="color: var(--text); opacity: 0.7;">Aucune recherche récente</p>';
+                    return;
+                }
+
+                searchHistory.slice(0, 5).forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
                 <span>${item.type}: ${item.query}</span>
                 <span style="color: var(--text); opacity: 0.7;">${new Date(item.timestamp).toLocaleString()}</span>
             `;
-            historyItem.addEventListener('click', () => {
-                document.getElementById('searchType').value = item.type;
-                document.getElementById('searchQuery').value = item.query;
+                    historyItem.addEventListener('click', () => {
+                        document.getElementById('searchType').value = item.type;
+                        document.getElementById('searchQuery').value = item.query;
+                    });
+                    historyList.appendChild(historyItem);
+                });
+            }
+
+            clearHistoryBtn.addEventListener('click', () => {
+                searchHistory = [];
+                localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+                updateHistoryDisplay();
             });
-            historyList.appendChild(historyItem);
-        });
-    }
 
-    clearHistoryBtn.addEventListener('click', () => {
-        searchHistory = [];
-        localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
-        updateHistoryDisplay();
-    });
+            updateHistoryDisplay();
 
-    updateHistoryDisplay();
+            // Gestion du formulaire de recherche
+            const searchForm = document.getElementById('searchForm');
+            searchForm.addEventListener('submit', function (e) {
+                e.preventDefault();
 
-    // Gestion du formulaire de recherche
-    const searchForm = document.getElementById('searchForm');
-    searchForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const searchType = document.getElementById('searchType').value;
-        const searchQuery = document.getElementById('searchQuery').value.trim();
-        
-        if (!searchType || !searchQuery) return;
-        
-        // Ajouter à l'historique
-        searchHistory.unshift({
-            type: searchType,
-            query: searchQuery,
-            timestamp: new Date().toISOString()
-        });
-        
-        // Garder seulement les 10 dernières recherches
-        if (searchHistory.length > 10) {
-            searchHistory = searchHistory.slice(0, 10);
-        }
-        
-        localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
-        updateHistoryDisplay();
-        
-        // Préparer l'interface pour la recherche
-        prepareSearchUI(searchType, searchQuery);
-    });
+                const searchType = document.getElementById('searchType').value;
+                const searchQuery = document.getElementById('searchQuery').value.trim();
 
-    function prepareSearchUI(type, query) {
-        // Afficher l'indicateur de chargement
-        document.getElementById('initialMessage').classList.add('hidden');
-        document.getElementById('loadingIndicator').classList.remove('hidden');
-        document.getElementById('errorMessage').classList.add('hidden');
-        document.getElementById('resultsContainer').innerHTML = '';
-        
-        // Mettre à jour le statut
-        document.getElementById('searchStatus').innerHTML = `
+                if (!searchType || !searchQuery) return;
+
+                // Ajouter à l'historique
+                searchHistory.unshift({
+                    type: searchType,
+                    query: searchQuery,
+                    timestamp: new Date().toISOString()
+                });
+
+                // Garder seulement les 10 dernières recherches
+                if (searchHistory.length > 10) {
+                    searchHistory = searchHistory.slice(0, 10);
+                }
+
+                localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+                updateHistoryDisplay();
+
+                // Préparer l'interface pour la recherche
+                prepareSearchUI(searchType, searchQuery);
+            });
+
+            function prepareSearchUI(type, query) {
+                // Afficher l'indicateur de chargement
+                document.getElementById('initialMessage').classList.add('hidden');
+                document.getElementById('loadingIndicator').classList.remove('hidden');
+                document.getElementById('errorMessage').classList.add('hidden');
+                document.getElementById('resultsContainer').innerHTML = '';
+
+                // Mettre à jour le statut
+                document.getElementById('searchStatus').innerHTML = `
             <span style="color: var(--accent);">
                 <i class="fas fa-spinner fa-pulse"></i> Recherche ${type} pour "${query}"
             </span>
         `;
-        
-        // Ici, votre script existant prendra le relais pour effectuer la recherche réelle
-        // Cette fonction ne fait que préparer l'interface utilisateur
-    }
 
-    // Fonction pour afficher les résultats (à appeler depuis votre script existant)
-    window.displayResults = function(results) {
-        const container = document.getElementById('resultsContainer');
-        container.innerHTML = '';
-        
-        // Masquer l'indicateur de chargement
-        document.getElementById('loadingIndicator').classList.add('hidden');
-        
-        if (!results || results.length === 0) {
-            container.innerHTML = `
+                // Ici, votre script existant prendra le relais pour effectuer la recherche réelle
+                // Cette fonction ne fait que préparer l'interface utilisateur
+            }
+
+            // Fonction pour afficher les résultats (à appeler depuis votre script existant)
+            window.displayResults = function (results) {
+                const container = document.getElementById('resultsContainer');
+                container.innerHTML = '';
+
+                // Masquer l'indicateur de chargement
+                document.getElementById('loadingIndicator').classList.add('hidden');
+
+                if (!results || results.length === 0) {
+                    container.innerHTML = `
                 <div class="error">
                     <i class="fas fa-info-circle"></i>
                     <div>Aucun résultat trouvé pour cette recherche</div>
                 </div>
             `;
-            
-            // Mettre à jour le statut
-            document.getElementById('searchStatus').innerHTML = `
+
+                    // Mettre à jour le statut
+                    document.getElementById('searchStatus').innerHTML = `
                 <span style="color: var(--danger);">
                     <i class="fas fa-times-circle"></i> Aucun résultat trouvé
                 </span>
             `;
-            return;
-        }
-        
-        results.forEach(result => {
-            const card = document.createElement('div');
-            card.className = 'result-card';
-            card.innerHTML = `
+                    return;
+                }
+
+                results.forEach(result => {
+                    const card = document.createElement('div');
+                    card.className = 'result-card';
+                    card.innerHTML = `
                 <div class="result-title">
                     ${result.title}
                     ${result.badges ? result.badges.join('') : ''}
@@ -328,31 +324,31 @@
                     </span>
                 </div>
             `;
-            container.appendChild(card);
-        });
-        
-        // Mettre à jour le statut
-        document.getElementById('searchStatus').innerHTML = `
+                    container.appendChild(card);
+                });
+
+                // Mettre à jour le statut
+                document.getElementById('searchStatus').innerHTML = `
             <span style="color: var(--success);">
                 <i class="fas fa-check-circle"></i> ${results.length} résultat(s) trouvé(s)
             </span>
         `;
-    };
+            };
 
-    // Fonction pour afficher les erreurs (à appeler depuis votre script existant)
-    window.showSearchError = function(errorMessage) {
-        document.getElementById('loadingIndicator').classList.add('hidden');
-        document.getElementById('errorText').textContent = errorMessage;
-        document.getElementById('errorMessage').classList.remove('hidden');
-        
-        // Mettre à jour le statut
-        document.getElementById('searchStatus').innerHTML = `
+            // Fonction pour afficher les erreurs (à appeler depuis votre script existant)
+            window.showSearchError = function (errorMessage) {
+                document.getElementById('loadingIndicator').classList.add('hidden');
+                document.getElementById('errorText').textContent = errorMessage;
+                document.getElementById('errorMessage').classList.remove('hidden');
+
+                // Mettre à jour le statut
+                document.getElementById('searchStatus').innerHTML = `
             <span style="color: var(--danger);">
                 <i class="fas fa-times-circle"></i> Erreur lors de la recherche
             </span>
         `;
-    };
-});
+            };
+        });
     </script>
     <script src="js/osint.js"></script>
 </body>
