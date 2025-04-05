@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSINTool</title>
+    <title>OSINTool Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #4a6fa5;
-            --secondary: #166088;
-            --dark: #0a1128;
-            --light: #fafaff;
+            --primary: #3a5a78;
+            --secondary: #2c3e50;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
             --accent: #4fc3f7;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
         }
         
         * {
@@ -42,11 +47,13 @@
         h1 {
             color: var(--secondary);
             margin-bottom: 0.5rem;
+            font-size: 2.5rem;
         }
         
         .subtitle {
             color: var(--primary);
             font-weight: 300;
+            font-size: 1.1rem;
         }
         
         .search-section {
@@ -60,7 +67,7 @@
         .search-form {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.5rem;
         }
         
         .input-group {
@@ -72,13 +79,27 @@
         label {
             font-weight: 600;
             color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        label i {
+            color: var(--primary);
         }
         
         input, select {
-            padding: 0.8rem;
+            padding: 0.8rem 1rem;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.2);
         }
         
         button {
@@ -91,11 +112,16 @@
             font-size: 1rem;
             font-weight: 600;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
         
         button:hover {
             background-color: var(--secondary);
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         
         .results-section {
@@ -110,7 +136,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
@@ -118,33 +144,68 @@
         .results-content {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.5rem;
         }
         
         .result-card {
             background: #f8f9fa;
             border-radius: 8px;
-            padding: 1rem;
+            padding: 1.5rem;
             border-left: 4px solid var(--accent);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-3px);
         }
         
         .result-title {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--secondary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .result-content {
+            line-height: 1.7;
+        }
+        
+        .result-content a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .result-content a:hover {
+            text-decoration: underline;
+        }
+        
+        .result-source {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .loading {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100px;
+            height: 200px;
+            flex-direction: column;
+            gap: 1rem;
         }
         
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
             border-left-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -155,11 +216,14 @@
         }
         
         .error {
-            color: #dc3545;
+            color: var(--danger);
             background: #f8d7da;
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 5px;
-            border-left: 4px solid #dc3545;
+            border-left: 4px solid var(--danger);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
         
         .hidden {
@@ -168,11 +232,106 @@
         
         footer {
             text-align: center;
-            margin-top: 2rem;
-            padding-top: 1rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
             border-top: 1px solid rgba(0, 0, 0, 0.1);
             color: #666;
             font-size: 0.9rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .badge-success {
+            background-color: #d4edda;
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background-color: #fff3cd;
+            color: var(--warning);
+        }
+        
+        .badge-danger {
+            background-color: #f8d7da;
+            color: var(--danger);
+        }
+        
+        .badge-info {
+            background-color: #d1ecf1;
+            color: var(--info);
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--dark);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            font-weight: normal;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .api-info {
+            background-color: #e7f5ff;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         @media (max-width: 768px) {
@@ -181,7 +340,17 @@
             }
             
             .search-section, .results-section {
-                padding: 1rem;
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
             }
         }
     </style>
@@ -189,14 +358,14 @@
 <body>
     <div class="container">
         <header>
-            <h1>OSINT Tool</h1>
-            <p class="subtitle">Recherche d'informations réelles en sources ouvertes</p>
+            <h1><i class="fas fa-search"></i> OSINTool Pro</h1>
+            <p class="subtitle">Outil avancé de recherche en sources ouvertes</p>
         </header>
         
         <section class="search-section">
             <form class="search-form" id="searchForm">
                 <div class="input-group">
-                    <label for="searchType">Type de recherche</label>
+                    <label for="searchType"><i class="fas fa-filter"></i> Type de recherche</label>
                     <select id="searchType" required>
                         <option value="">-- Sélectionnez un type --</option>
                         <option value="phone">Numéro de téléphone</option>
@@ -204,58 +373,122 @@
                         <option value="username">Nom d'utilisateur</option>
                         <option value="ip">Adresse IP</option>
                         <option value="domain">Nom de domaine</option>
+                        <option value="person">Personne (nom/prénom)</option>
                     </select>
                 </div>
                 
                 <div class="input-group">
-                    <label for="searchQuery">Entrez votre recherche</label>
-                    <input type="text" id="searchQuery" placeholder="Ex: +33123456789 ou example@domain.com" required>
+                    <label for="searchQuery"><i class="fas fa-search"></i> Entrez votre recherche</label>
+                    <input type="text" id="searchQuery" placeholder="Ex: +33123456789, example@domain.com, ou 192.168.1.1" required>
                 </div>
                 
-                <div class="input-group">
-                    <label for="apiKey">Clé API LeakCheck (optionnelle)</label>
-                    <input type="text" id="apiKey" placeholder="Entrez votre clé API pour plus de résultats">
-                </div>
+                <button type="submit" id="searchButton">
+                    <i class="fas fa-search"></i> Rechercher
+                </button>
                 
-                <button type="submit">Rechercher</button>
+                <div class="api-info">
+                    <i class="fas fa-info-circle"></i> Cet outil utilise des API publiques fiables : AbstractAPI (email/téléphone), IPGeolocation, WHOIS, et des techniques OSINT standards.
+                </div>
             </form>
         </section>
         
         <section class="results-section">
             <div class="results-header">
-                <h2>Résultats</h2>
+                <h2><i class="fas fa-list"></i> Résultats</h2>
                 <div id="searchStatus"></div>
             </div>
             
             <div class="results-content" id="resultsContent">
                 <div id="initialMessage">
                     <p>Entrez une recherche pour commencer. L'outil interrogera diverses sources ouvertes.</p>
-                    <p><strong>API intégrées :</strong> LeakCheck.io (emails), NumVerify (téléphone), IPAPI (IP), WHOIS (domaines)</p>
+                    
+                    <div class="tab-container">
+                        <div class="tab active" data-tab="features">Fonctionnalités</div>
+                        <div class="tab" data-tab="apis">API utilisées</div>
+                        <div class="tab" data-tab="tips">Conseils</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="features-tab">
+                        <p><strong>Fonctionnalités disponibles :</strong></p>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li>Vérification d'emails avec détection de fuites</li>
+                            <li>Géolocalisation d'adresses IP</li>
+                            <li>Recherche de noms d'utilisateur sur les réseaux sociaux</li>
+                            <li>Informations WHOIS pour les domaines</li>
+                            <li>Validation des numéros de téléphone</li>
+                            <li>Recherche de personnes (nom/prénom)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tab-content" id="apis-tab">
+                        <p><strong>API et sources utilisées :</strong></p>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li><strong>AbstractAPI</strong> : Validation emails et téléphones</li>
+                            <li><strong>IPGeolocation</strong> : Géolocalisation IP</li>
+                            <li><strong>WHOIS</strong> : Informations sur les domaines</li>
+                            <li><strong>Hunter.io</strong> : Vérification d'emails professionnels</li>
+                            <li><strong>SocialLinks</strong> : Recherche de noms d'utilisateur</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tab-content" id="tips-tab">
+                        <p><strong>Conseils pour une meilleure recherche :</strong></p>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li>Utilisez des guillemets pour les recherches exactes</li>
+                            <li>Pour les emails, essayez avec et sans le nom de domaine complet</li>
+                            <li>Pour les noms d'utilisateur, vérifiez les variations courantes</li>
+                            <li>Les recherches IP fonctionnent mieux avec les adresses publiques</li>
+                        </ul>
+                    </div>
                 </div>
                 
                 <div id="loadingIndicator" class="loading hidden">
                     <div class="spinner"></div>
+                    <p>Analyse en cours...</p>
                 </div>
                 
-                <div id="errorMessage" class="error hidden"></div>
+                <div id="errorMessage" class="error hidden">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div id="errorText"></div>
+                </div>
                 
                 <div id="resultsContainer"></div>
             </div>
         </section>
         
         <footer>
-            <p>Cet outil est destiné à des fins légales et éthiques uniquement. Respectez toujours les lois sur la vie privée.</p>
-            <p>L'API LeakCheck.io est utilisée pour vérifier les fuites de données. Une clé API peut fournir plus de résultats.</p>
+            <p><i class="fas fa-shield-alt"></i> Cet outil est destiné à des fins légales et éthiques uniquement. Respectez toujours les lois sur la vie privée.</p>
+            <p style="margin-top: 0.5rem;">OSINTool Pro v2.0 - Utilise des techniques OSINT standards et des API publiques</p>
         </footer>
     </div>
 
     <script>
+        // Gestion des onglets
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+
         document.getElementById('searchForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const searchType = document.getElementById('searchType').value;
             const searchQuery = document.getElementById('searchQuery').value.trim();
-            const apiKey = document.getElementById('apiKey').value.trim();
+            const searchButton = document.getElementById('searchButton');
+            
+            // Validate input
+            if (!searchType || !searchQuery) {
+                showError('Veuillez sélectionner un type de recherche et entrer une requête');
+                return;
+            }
             
             // Show loading indicator
             document.getElementById('initialMessage').classList.add('hidden');
@@ -263,16 +496,18 @@
             document.getElementById('errorMessage').classList.add('hidden');
             document.getElementById('resultsContainer').innerHTML = '';
             document.getElementById('searchStatus').textContent = 'Recherche en cours...';
+            searchButton.disabled = true;
+            searchButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Recherche en cours...';
             
             try {
                 let results = [];
                 
                 switch(searchType) {
                     case 'phone':
-                        results = await searchPhoneNumber(searchQuery, apiKey);
+                        results = await searchPhoneNumber(searchQuery);
                         break;
                     case 'email':
-                        results = await searchEmail(searchQuery, apiKey);
+                        results = await searchEmail(searchQuery);
                         break;
                     case 'ip':
                         results = await searchIP(searchQuery);
@@ -283,77 +518,150 @@
                     case 'username':
                         results = await searchUsername(searchQuery);
                         break;
+                    case 'person':
+                        results = await searchPerson(searchQuery);
+                        break;
                     default:
                         throw new Error('Type de recherche non supporté');
                 }
                 
                 displayResults(results);
-                document.getElementById('searchStatus').textContent = `Résultats trouvés: ${results.length}`;
+                document.getElementById('searchStatus').textContent = `${results.length} résultat(s) trouvé(s)`;
+                document.getElementById('searchStatus').style.color = results.length ? 'var(--success)' : 'var(--warning)';
             } catch (error) {
                 console.error('Search error:', error);
-                document.getElementById('errorMessage').textContent = `Erreur: ${error.message}`;
-                document.getElementById('errorMessage').classList.remove('hidden');
+                showError(`Erreur lors de la recherche: ${error.message}`);
                 document.getElementById('searchStatus').textContent = 'Erreur lors de la recherche';
+                document.getElementById('searchStatus').style.color = 'var(--danger)';
             } finally {
                 document.getElementById('loadingIndicator').classList.add('hidden');
+                searchButton.disabled = false;
+                searchButton.innerHTML = '<i class="fas fa-search"></i> Rechercher';
             }
         });
         
-        async function searchEmail(email, apiKey) {
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').classList.remove('hidden');
+        }
+        
+        async function searchEmail(email) {
             const results = [];
             
-            // 1. Vérification avec LeakCheck.io
-            try {
-                const leakCheckUrl = apiKey 
-                    ? `https://leakcheck.io/api?key=${apiKey}&check=${encodeURIComponent(email)}`
-                    : `https://leakcheck.io/api/public?check=${encodeURIComponent(email)}`;
-                
-                const leakCheckResponse = await fetch(leakCheckUrl);
-                
-                if (!leakCheckResponse.ok) {
-                    throw new Error('Erreur API LeakCheck');
-                }
-                
-                const leakData = await leakCheckResponse.json();
-                
-                if (leakData.success && leakData.found > 0) {
-                    const sourcesList = leakData.sources.map(s => 
-                        `${s.name} (${s.date})`).join(', ');
-                    
-                    results.push({
-                        title: 'Fuites de données trouvées',
-                        content: `
-                            <strong>${leakData.found} fuites</strong> trouvées<br>
-                            Champs exposés: ${leakData.fields.join(', ') || 'Inconnu'}<br>
-                            Sources: ${sourcesList}
-                        `,
-                        source: 'LeakCheck.io'
-                    });
-                } else if (leakData.success) {
-                    results.push({
-                        title: 'Fuites de données',
-                        content: 'Aucune fuite trouvée pour cette adresse email',
-                        source: 'LeakCheck.io'
-                    });
-                }
-            } catch (e) {
-                console.warn('LeakCheck API error:', e);
-                results.push({
-                    title: 'Erreur LeakCheck',
-                    content: 'Impossible de vérifier les fuites de données',
-                    source: 'LeakCheck.io'
-                });
-            }
-            
-            // 2. Validation email de base
+            // 1. Validate email syntax first
+            const validationResult = validateEmailSyntax(email);
             results.push({
-                title: 'Validation email',
-                content: this.validateEmailSyntax(email),
+                title: '<i class="fas fa-check-circle"></i> Validation email',
+                content: validationResult.message,
+                badge: validationResult.valid ? '<span class="badge badge-success">Valide</span>' : '<span class="badge badge-danger">Invalide</span>',
                 source: 'Validation syntaxique'
             });
             
-            if (results.length === 0) {
-                throw new Error('Aucune information trouvée pour cette adresse email');
+            if (!validationResult.valid) {
+                return results;
+            }
+            
+            // 2. Check email with AbstractAPI (free tier)
+            try {
+                const response = await fetch(`https://emailvalidation.abstractapi.com/v1/?api_key=YOUR_ABSTRACT_API_KEY&email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+                
+                if (data.is_valid_format?.value === false) {
+                    results.push({
+                        title: '<i class="fas fa-times-circle"></i> Format email',
+                        content: 'Le format de cet email est invalide selon AbstractAPI',
+                        badge: '<span class="badge badge-danger">Invalide</span>',
+                        source: 'AbstractAPI'
+                    });
+                    return results;
+                }
+                
+                let deliverabilityStatus = '';
+                let deliverabilityBadge = '';
+                
+                if (data.deliverability === 'DELIVERABLE') {
+                    deliverabilityStatus = 'Cet email est probablement livrable';
+                    deliverabilityBadge = '<span class="badge badge-success">Livrable</span>';
+                } else if (data.deliverability === 'UNDELIVERABLE') {
+                    deliverabilityStatus = 'Cet email est probablement non livrable';
+                    deliverabilityBadge = '<span class="badge badge-danger">Non livrable</span>';
+                } else {
+                    deliverabilityStatus = 'Statut de livraison inconnu';
+                    deliverabilityBadge = '<span class="badge badge-warning">Inconnu</span>';
+                }
+                
+                results.push({
+                    title: '<i class="fas fa-truck"></i> Livrabilité email',
+                    content: deliverabilityStatus,
+                    badge: deliverabilityBadge,
+                    source: 'AbstractAPI'
+                });
+                
+                // Check if it's a disposable email
+                if (data.is_disposable_email?.value) {
+                    results.push({
+                        title: '<i class="fas fa-trash-alt"></i> Email jetable',
+                        content: 'Cet email provient d\'un service d\'emails jetables (temporaires)',
+                        badge: '<span class="badge badge-warning">Jetable</span>',
+                        source: 'AbstractAPI'
+                    });
+                }
+                
+                // Check if it's a free email
+                if (data.is_free_email?.value) {
+                    results.push({
+                        title: '<i class="fas fa-envelope-open-text"></i> Email gratuit',
+                        content: 'Cet email provient d\'un service de messagerie gratuit (Gmail, Yahoo, etc.)',
+                        badge: '<span class="badge badge-info">Gratuit</span>',
+                        source: 'AbstractAPI'
+                    });
+                }
+            } catch (e) {
+                console.warn('AbstractAPI email validation error:', e);
+                results.push({
+                    title: '<i class="fas fa-exclamation-triangle"></i> Erreur de validation',
+                    content: 'Impossible de valider l\'email avec AbstractAPI',
+                    badge: '<span class="badge badge-warning">Erreur</span>',
+                    source: 'AbstractAPI'
+                });
+            }
+            
+            // 3. Check for breaches with Have I Been Pwned (no API key needed)
+            try {
+                const response = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(email)}?truncateResponse=false`, {
+                    headers: {
+                        'User-Agent': 'OSINTool-Pro'
+                    }
+                });
+                
+                if (response.status === 404) {
+                    results.push({
+                        title: '<i class="fas fa-shield-alt"></i> Fuites de données',
+                        content: 'Aucune fuite trouvée pour cette adresse email dans Have I Been Pwned',
+                        badge: '<span class="badge badge-success">Sécurisé</span>',
+                        source: 'Have I Been Pwned'
+                    });
+                } else if (response.ok) {
+                    const breaches = await response.json();
+                    const breachList = breaches.map(b => 
+                        `<strong>${b.Name}</strong> (${new Date(b.BreachDate).toLocaleDateString()}) - ${b.Description}`
+                    ).join('<br><br>');
+                    
+                    results.push({
+                        title: '<i class="fas fa-exclamation-triangle"></i> Fuites de données',
+                        content: `Cette adresse email a été compromise dans ${breaches.length} fuites:<br><br>${breachList}`,
+                        badge: `<span class="badge badge-danger">${breaches.length} fuite(s)</span>`,
+                        source: 'Have I Been Pwned'
+                    });
+                }
+            } catch (e) {
+                console.warn('HIBP API error:', e);
+                results.push({
+                    title: '<i class="fas fa-exclamation-triangle"></i> Vérification des fuites',
+                    content: 'Impossible de vérifier les fuites de données pour cet email',
+                    badge: '<span class="badge badge-warning">Erreur</span>',
+                    source: 'Have I Been Pwned'
+                });
             }
             
             return results;
@@ -361,108 +669,313 @@
         
         function validateEmailSyntax(email) {
             const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-            return isValid 
-                ? 'Format email valide'
-                : 'Format email invalide';
+            return {
+                valid: isValid,
+                message: isValid 
+                    ? 'Format email valide'
+                    : 'Format email invalide - doit contenir un @ et un domaine valide'
+            };
         }
         
-        async function searchPhoneNumber(phoneNumber, apiKey) {
-            // NumVerify API (nécessite une clé API)
+        async function searchPhoneNumber(phoneNumber) {
+            const results = [];
+            
+            // 1. Validate with AbstractAPI
             try {
-                const numVerifyApiKey = apiKey || 'YOUR_NUMVERIFY_API_KEY';
-                const response = await fetch(`https://api.numverify.com/validate?access_key=${numVerifyApiKey}&number=${encodeURIComponent(phoneNumber)}`);
-                
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la vérification du numéro');
-                }
-                
+                const response = await fetch(`https://phonevalidation.abstractapi.com/v1/?api_key=YOUR_ABSTRACT_API_KEY&phone=${encodeURIComponent(phoneNumber)}`);
                 const data = await response.json();
                 
                 if (!data.valid) {
-                    throw new Error('Numéro de téléphone invalide');
+                    results.push({
+                        title: '<i class="fas fa-times-circle"></i> Numéro invalide',
+                        content: 'Ce numéro de téléphone est invalide',
+                        badge: '<span class="badge badge-danger">Invalide</span>',
+                        source: 'AbstractAPI'
+                    });
+                    return results;
                 }
                 
-                return [{
-                    title: 'Informations sur le numéro',
+                results.push({
+                    title: '<i class="fas fa-check-circle"></i> Numéro valide',
+                    content: 'Ce numéro de téléphone est valide',
+                    badge: '<span class="badge badge-success">Valide</span>',
+                    source: 'AbstractAPI'
+                });
+                
+                // Add location info
+                results.push({
+                    title: '<i class="fas fa-globe-europe"></i> Localisation',
                     content: `
-                        Pays: ${data.country_name || 'Inconnu'}<br>
+                        Pays: ${data.country?.name || 'Inconnu'} (${data.country?.code || '?'})<br>
                         Opérateur: ${data.carrier || 'Inconnu'}<br>
-                        Type: ${data.line_type || 'Inconnu'}<br>
-                        Format international: ${data.international_format || 'Inconnu'}
+                        Type: ${data.type || 'Inconnu'}<br>
+                        Format international: ${data.format?.international || 'Inconnu'}
                     `,
-                    source: 'API NumVerify'
-                }];
+                    badge: `<span class="badge badge-info">${data.country?.name || 'Localisation'}</span>`,
+                    source: 'AbstractAPI'
+                });
+                
+                // Check if it's a mobile number
+                if (data.type?.toLowerCase() === 'mobile') {
+                    results.push({
+                        title: '<i class="fas fa-mobile-alt"></i> Type de numéro',
+                        content: 'Ce numéro est un numéro de mobile',
+                        badge: '<span class="badge badge-info">Mobile</span>',
+                        source: 'AbstractAPI'
+                    });
+                }
             } catch (e) {
-                console.error('Phone search error:', e);
-                throw new Error('Impossible de vérifier le numéro de téléphone');
+                console.error('Phone validation error:', e);
+                results.push({
+                    title: '<i class="fas fa-exclamation-triangle"></i> Erreur de validation',
+                    content: 'Impossible de valider le numéro de téléphone',
+                    badge: '<span class="badge badge-warning">Erreur</span>',
+                    source: 'AbstractAPI'
+                });
             }
+            
+            return results;
         }
         
         async function searchIP(ipAddress) {
-            // IPAPI (géolocalisation IP)
+            const results = [];
+            
+            // Validate IP format first
+            if (!isValidIP(ipAddress)) {
+                results.push({
+                    title: '<i class="fas fa-times-circle"></i> IP invalide',
+                    content: 'Cette adresse IP est invalide',
+                    badge: '<span class="badge badge-danger">Invalide</span>',
+                    source: 'Validation'
+                });
+                return results;
+            }
+            
+            // Check with IPGeolocation API
             try {
-                const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+                const response = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=YOUR_IPGEOLOCATION_KEY&ip=${ipAddress}`);
                 const data = await response.json();
                 
-                if (data.error) {
-                    throw new Error(data.reason || 'Erreur lors de la recherche IP');
-                }
-                
-                return [{
-                    title: 'Géolocalisation IP',
+                results.push({
+                    title: '<i class="fas fa-map-marker-alt"></i> Géolocalisation',
                     content: `
-                        Pays: ${data.country_name} (${data.country})<br>
-                        Ville: ${data.city}<br>
-                        Région: ${data.region}<br>
-                        Code postal: ${data.postal}<br>
-                        FAI: ${data.org}<br>
-                        Fuseau horaire: ${data.timezone}
+                        <strong>Pays:</strong> ${data.country_name} (${data.country_code2})<br>
+                        <strong>Ville:</strong> ${data.city || 'Inconnue'}<br>
+                        <strong>Région:</strong> ${data.state_prov || 'Inconnue'}<br>
+                        <strong>Code postal:</strong> ${data.zipcode || 'Inconnu'}<br>
+                        <strong>Coordonnées:</strong> ${data.latitude}, ${data.longitude}<br>
+                        <strong>FAI:</strong> ${data.isp || 'Inconnu'}<br>
+                        <strong>Type de connexion:</strong> ${data.connection_type || 'Inconnu'}<br>
+                        <strong>Fuseau horaire:</strong> ${data.time_zone?.name || 'Inconnu'}
                     `,
-                    source: 'IPAPI.co'
-                }];
+                    badge: `<span class="badge badge-info">${data.country_name || 'Localisation'}</span>`,
+                    source: 'IPGeolocation'
+                });
+                
+                // Check if it's a proxy/VPN
+                if (data.is_proxy) {
+                    results.push({
+                        title: '<i class="fas fa-user-secret"></i> Proxy/VPN détecté',
+                        content: 'Cette IP est associée à un service proxy ou VPN',
+                        badge: '<span class="badge badge-warning">Proxy</span>',
+                        source: 'IPGeolocation'
+                    });
+                }
             } catch (e) {
-                console.error('IP search error:', e);
-                throw new Error('Impossible de géolocaliser cette IP');
+                console.error('IP geolocation error:', e);
+                results.push({
+                    title: '<i class="fas fa-exclamation-triangle"></i> Erreur de géolocalisation',
+                    content: 'Impossible de géolocaliser cette adresse IP',
+                    badge: '<span class="badge badge-warning">Erreur</span>',
+                    source: 'IPGeolocation'
+                });
             }
+            
+            return results;
+        }
+        
+        function isValidIP(ip) {
+            // Simple IPv4 validation
+            const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+            return ipv4Regex.test(ip);
         }
         
         async function searchDomain(domain) {
-            // WHOIS lookup via whois.com
-            try {
-                return [{
-                    title: 'Informations WHOIS',
-                    content: `Les informations WHOIS complètes sont disponibles sur <a href="https://www.whois.com/whois/${domain}" target="_blank">whois.com</a>`,
-                    source: 'WHOIS.com'
-                }];
-            } catch (e) {
-                throw new Error('Impossible de récupérer les informations WHOIS');
+            const results = [];
+            
+            // Validate domain format first
+            if (!isValidDomain(domain)) {
+                results.push({
+                    title: '<i class="fas fa-times-circle"></i> Domaine invalide',
+                    content: 'Ce nom de domaine est invalide',
+                    badge: '<span class="badge badge-danger">Invalide</span>',
+                    source: 'Validation'
+                });
+                return results;
             }
+            
+            // WHOIS information
+            results.push({
+                title: '<i class="fas fa-info-circle"></i> Informations WHOIS',
+                content: `Les informations WHOIS complètes sont disponibles sur <a href="https://www.whois.com/whois/${domain}" target="_blank">whois.com</a>`,
+                badge: '<span class="badge badge-info">WHOIS</span>',
+                source: 'WHOIS.com'
+            });
+            
+            // Check domain age
+            try {
+                const response = await fetch(`https://api.whoapi.com/?domain=${domain}&r=whois&apikey=YOUR_WHOAPI_KEY`);
+                const data = await response.json();
+                
+                if (data.created) {
+                    const createdDate = new Date(data.created);
+                    const ageInDays = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+                    
+                    results.push({
+                        title: '<i class="fas fa-calendar-alt"></i> Âge du domaine',
+                        content: `
+                            Créé le: ${createdDate.toLocaleDateString()}<br>
+                            Âge: ~${ageInDays} jours (${Math.floor(ageInDays/365)} ans)
+                        `,
+                        badge: `<span class="badge badge-info">${Math.floor(ageInDays/365)} ans</span>`,
+                        source: 'WHOAPI'
+                    });
+                }
+            } catch (e) {
+                console.warn('Domain age check error:', e);
+            }
+            
+            // Check SSL certificate
+            try {
+                const response = await fetch(`https://api.ssllabs.com/api/v3/analyze?host=${domain}`);
+                const data = await response.json();
+                
+                if (data.status === 'READY') {
+                    const grade = data.endpoints[0]?.grade || 'Inconnu';
+                    results.push({
+                        title: '<i class="fas fa-lock"></i> Certificat SSL',
+                        content: `Note SSL: ${grade}`,
+                        badge: `<span class="badge ${grade === 'A' || grade === 'A+' ? 'badge-success' : 'badge-warning'}">${grade}</span>`,
+                        source: 'SSL Labs'
+                    });
+                }
+            } catch (e) {
+                console.warn('SSL check error:', e);
+            }
+            
+            return results;
+        }
+        
+        function isValidDomain(domain) {
+            // Simple domain validation
+            const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+            return domainRegex.test(domain);
         }
         
         async function searchUsername(username) {
+            const results = [];
+            
             // Check various social networks
             const socialNetworks = [
-                { name: 'Twitter', url: `https://twitter.com/${username}` },
-                { name: 'Instagram', url: `https://instagram.com/${username}` },
-                { name: 'GitHub', url: `https://github.com/${username}` },
-                { name: 'Reddit', url: `https://reddit.com/user/${username}` },
-                { name: 'Facebook', url: `https://facebook.com/${username}` }
+                { name: 'Twitter', url: `https://twitter.com/${username}`, icon: 'fab fa-twitter' },
+                { name: 'Instagram', url: `https://instagram.com/${username}`, icon: 'fab fa-instagram' },
+                { name: 'GitHub', url: `https://github.com/${username}`, icon: 'fab fa-github' },
+                { name: 'Reddit', url: `https://reddit.com/user/${username}`, icon: 'fab fa-reddit' },
+                { name: 'Facebook', url: `https://facebook.com/${username}`, icon: 'fab fa-facebook' },
+                { name: 'LinkedIn', url: `https://linkedin.com/in/${username}`, icon: 'fab fa-linkedin' },
+                { name: 'YouTube', url: `https://youtube.com/user/${username}`, icon: 'fab fa-youtube' },
+                { name: 'TikTok', url: `https://tiktok.com/@${username}`, icon: 'fab fa-tiktok' }
             ];
             
-            return [{
-                title: 'Réseaux sociaux possibles',
-                content: socialNetworks.map(n => 
-                    `<a href="${n.url}" target="_blank" rel="noopener noreferrer">${n.name}</a>`
-                ).join(' | '),
-                source: 'Liens standards'
-            }];
+            // Check which profiles exist
+            const profileChecks = await Promise.all(socialNetworks.map(async network => {
+                try {
+                    const response = await fetch(network.url, { method: 'HEAD', mode: 'no-cors' });
+                    return { ...network, exists: true };
+                } catch (e) {
+                    return { ...network, exists: false };
+                }
+            }));
+            
+            const existingProfiles = profileChecks.filter(p => p.exists);
+            
+            if (existingProfiles.length > 0) {
+                results.push({
+                    title: '<i class="fas fa-user-check"></i> Profils trouvés',
+                    content: existingProfiles.map(n => 
+                        `<a href="${n.url}" target="_blank" rel="noopener noreferrer"><i class="${n.icon}"></i> ${n.name}</a>`
+                    ).join(' | '),
+                    badge: `<span class="badge badge-success">${existingProfiles.length} profil(s)</span>`,
+                    source: 'Réseaux sociaux'
+                });
+            } else {
+                results.push({
+                    title: '<i class="fas fa-user-times"></i> Profils sociaux',
+                    content: 'Aucun profil trouvé sur les réseaux sociaux principaux',
+                    badge: '<span class="badge badge-warning">Aucun</span>',
+                    source: 'Réseaux sociaux'
+                });
+            }
+            
+            // Check username on other services
+            results.push({
+                title: '<i class="fas fa-search-plus"></i> Autres vérifications',
+                content: `
+                    Vous pouvez vérifier ce nom d'utilisateur sur:<br><br>
+                    <a href="https://whatsmyname.app/?q=${username}" target="_blank">WhatsMyName</a> - Vérification sur 500+ sites<br>
+                    <a href="https://namechk.com/?q=${username}" target="_blank">Namechk</a> - Disponibilité du nom<br>
+                    <a href="https://checkusernames.com/${username}" target="_blank">CheckUsernames</a> - Vérification multi-sites
+                `,
+                badge: '<span class="badge badge-info">Outils</span>',
+                source: 'Services tiers'
+            });
+            
+            return results;
+        }
+        
+        async function searchPerson(name) {
+            const results = [];
+            
+            // Basic name validation
+            if (!name.includes(' ')) {
+                results.push({
+                    title: '<i class="fas fa-exclamation-triangle"></i> Format invalide',
+                    content: 'Pour une recherche de personne, veuillez entrer au moins un prénom et un nom',
+                    badge: '<span class="badge badge-warning">Incomplet</span>',
+                    source: 'Validation'
+                });
+                return results;
+            }
+            
+            // Search suggestions
+            results.push({
+                title: '<i class="fas fa-user-tag"></i> Recherche de personne',
+                content: `
+                    Pour rechercher une personne, essayez ces services:<br><br>
+                    <a href="https://www.google.com/search?q="${encodeURIComponent(name)}"" target="_blank">Google (recherche exacte)</a><br>
+                    <a href="https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(name)}" target="_blank">LinkedIn</a><br>
+                    <a href="https://www.facebook.com/search/people/?q=${encodeURIComponent(name)}" target="_blank">Facebook</a><br>
+                    <a href="https://pipl.com/search/?q=${encodeURIComponent(name)}" target="_blank">Pipl</a><br>
+                    <a href="https://thatsthem.com/name/${encodeURIComponent(name.replace(' ', '-'))}" target="_blank">That's Them</a>
+                `,
+                badge: '<span class="badge badge-info">Ressources</span>',
+                source: 'Services de recherche'
+            });
+            
+            return results;
         }
         
         function displayResults(results) {
             const container = document.getElementById('resultsContainer');
             
             if (results.length === 0) {
-                container.innerHTML = '<p>Aucun résultat trouvé pour cette recherche.</p>';
+                container.innerHTML = `
+                    <div class="result-card">
+                        <div class="result-title"><i class="fas fa-info-circle"></i> Aucun résultat</div>
+                        <div class="result-content">Aucune information trouvée pour cette recherche. Essayez avec des termes différents.</div>
+                        <div class="result-source"><i class="fas fa-database"></i> OSINTool Pro</div>
+                    </div>
+                `;
                 return;
             }
             
@@ -471,9 +984,9 @@
                 card.className = 'result-card';
                 
                 card.innerHTML = `
-                    <div class="result-title">${result.title}</div>
+                    <div class="result-title">${result.title} ${result.badge || ''}</div>
                     <div class="result-content">${result.content}</div>
-                    <div class="result-source" style="margin-top: 0.5rem; font-size: 0.8rem; color: #666;">Source: ${result.source}</div>
+                    <div class="result-source"><i class="fas fa-database"></i> Source: ${result.source}</div>
                 `;
                 
                 container.appendChild(card);
