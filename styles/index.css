@@ -12,18 +12,31 @@
     --background: #f8f9fa;
     --card-bg: #fff;
     --border: rgba(0, 0, 0, 0.1);
+    --badge-bg: #f0f4f8;
 }
 
 [data-theme="dark"] {
     --primary: #4fc3f7;
     --secondary: #3a5a78;
-    --dark: #f8f9fa;
-    --light: #1a1a2e;
+    --dark: #0d1117;
+    --light: #f8f9fa;
     --accent: #4fc3f7;
     --text: #f0f0f0;
-    --background: #1a1a2e;
-    --card-bg: #2c3e50;
-    --border: rgba(255, 255, 255, 0.1);
+    --background: #161b22;
+    --card-bg: #0d1117;
+    --border: rgba(255, 255, 255, 0.15);
+    --badge-bg: #21262d;
+    
+    /* Couleurs spécifiques pour les badges */
+    --badge-success-bg: rgba(46, 160, 67, 0.1);
+    --badge-warning-bg: rgba(187, 128, 9, 0.1);
+    --badge-danger-bg: rgba(248, 81, 73, 0.1);
+    --badge-info-bg: rgba(56, 139, 253, 0.1);
+    
+    /* Couleurs pour les éléments spécifiques */
+    --api-info-bg: rgba(65, 132, 228, 0.1);
+    --error-bg: rgba(248, 81, 73, 0.1);
+    --device-info-bg: #21262d;
 }
 
 body {
@@ -38,6 +51,7 @@ body {
 .device-info-item {
     background: var(--card-bg);
     transition: background-color 0.3s ease;
+    border: 1px solid var(--border);
 }
 
 header, footer, .results-header {
@@ -48,10 +62,10 @@ input,
 select {
     background-color: var(--card-bg);
     color: var(--text);
-    border-color: var(--border);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
 }
 
-/* Ajoutez ce bouton dans votre header */
 .theme-toggle {
     position: absolute;
     top: 2rem;
@@ -62,12 +76,86 @@ select {
     cursor: pointer;
     color: var(--primary);
     transition: transform 0.3s ease;
+    z-index: 100;
 }
 
 .theme-toggle:hover {
     transform: scale(1.1);
 }
 
+/* Améliorations spécifiques pour le mode sombre */
+[data-theme="dark"] {
+    /* Correction des couleurs de texte */
+    h1, .subtitle, .result-title, label {
+        color: var(--light);
+    }
+    
+    /* Amélioration des ombres pour le mode sombre */
+    .search-section, .results-section, .result-card {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Correction des couleurs des badges */
+    .badge {
+        background-color: var(--badge-bg);
+    }
+    
+    .badge-success {
+        background-color: var(--badge-success-bg);
+        color: #3fb950;
+    }
+    
+    .badge-warning {
+        background-color: var(--badge-warning-bg);
+        color: #d29922;
+    }
+    
+    .badge-danger {
+        background-color: var(--badge-danger-bg);
+        color: #f85149;
+    }
+    
+    .badge-info {
+        background-color: var(--badge-info-bg);
+        color: #58a6ff;
+    }
+    
+    /* Correction des autres éléments */
+    .api-info {
+        background-color: var(--api-info-bg);
+        color: var(--accent);
+    }
+    
+    .error {
+        background: var(--error-bg);
+        color: #f85149;
+        border-left-color: #f85149;
+    }
+    
+    .device-info-item {
+        background: var(--device-info-bg);
+    }
+    
+    .tab-container {
+        border-bottom-color: var(--border);
+    }
+    
+    .tab.active {
+        color: var(--accent);
+    }
+    
+    .tooltip .tooltiptext {
+        background-color: var(--secondary);
+        color: var(--light);
+    }
+    
+    /* Amélioration de la lisibilité des liens */
+    .result-content a {
+        color: var(--accent);
+    }
+}
+
+/* Reste du CSS inchangé... */
 * {
     margin: 0;
     padding: 0;
@@ -85,7 +173,7 @@ header {
     text-align: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border);
 }
 
 h1 {
@@ -101,7 +189,7 @@ h1 {
 }
 
 .search-section {
-    background: white;
+    background: var(--card-bg);
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     padding: 2rem;
@@ -131,7 +219,6 @@ label {
 label i {
     color: var(--primary);
 }
-
 
 input:focus,
 select:focus {
@@ -163,7 +250,7 @@ button:hover {
 }
 
 .results-section {
-    background: white;
+    background: var(--card-bg);
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     padding: 2rem;
@@ -176,7 +263,7 @@ button:hover {
     align-items: center;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border);
 }
 
 .results-content {
@@ -186,7 +273,7 @@ button:hover {
 }
 
 .result-card {
-    background: #f8f9fa;
+    background: var(--badge-bg);
     border-radius: 8px;
     padding: 1.5rem;
     border-left: 4px solid var(--accent);
@@ -225,7 +312,8 @@ button:hover {
 .result-source {
     margin-top: 1rem;
     font-size: 0.85rem;
-    color: #666;
+    color: var(--text);
+    opacity: 0.8;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -243,7 +331,7 @@ button:hover {
 .spinner {
     width: 50px;
     height: 50px;
-    border: 5px solid rgba(0, 0, 0, 0.1);
+    border: 5px solid var(--border);
     border-left-color: var(--primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -274,8 +362,9 @@ footer {
     text-align: center;
     margin-top: 3rem;
     padding-top: 1.5rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    color: #666;
+    border-top: 1px solid var(--border);
+    color: var(--text);
+    opacity: 0.8;
     font-size: 0.9rem;
 }
 
@@ -392,7 +481,7 @@ footer {
 }
 
 .device-info-item {
-    background: #f0f4f8;
+    background: var(--badge-bg);
     padding: 0.8rem;
     border-radius: 5px;
 }
@@ -430,5 +519,10 @@ footer {
 
     .device-info-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .theme-toggle {
+        top: 1rem;
+        right: 1rem;
     }
 }
