@@ -345,6 +345,40 @@
             display: block;
         }
 
+        /* Map container */
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Device info */
+        .device-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .device-info-item {
+            background: #f0f4f8;
+            padding: 0.8rem;
+            border-radius: 5px;
+        }
+
+        .device-info-label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.85rem;
+        }
+
+        .device-info-value {
+            margin-top: 0.3rem;
+            font-size: 1rem;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
@@ -363,6 +397,10 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 0.5rem;
+            }
+
+            .device-info-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -478,8 +516,6 @@
                 publiques</p>
         </footer>
     </div>
-
-
 
     <script>
         // Gestion des onglets
@@ -769,6 +805,7 @@
 
             return results;
         }
+
         async function searchIP(ipAddress) {
             const results = [];
 
@@ -792,6 +829,7 @@
                     throw new Error(data.reason || 'Erreur de l\'API');
                 }
 
+                // Main IP information
                 results.push({
                     title: '<i class="fas fa-map-marker-alt"></i> Géolocalisation',
                     content: `
@@ -816,6 +854,62 @@
                         source: 'ipapi.co'
                     });
                 }
+
+                // Create map container
+                const mapContainer = document.createElement('div');
+                mapContainer.id = 'map';
+                mapContainer.style.height = '400px';
+                mapContainer.style.marginTop = '1rem';
+
+                // Add device information
+                const deviceInfo = getDeviceInfo();
+                const deviceInfoHTML = `
+                    <div class="device-info-grid">
+                        <div class="device-info-item">
+                            <div class="device-info-label">Navigateur</div>
+                            <div class="device-info-value">${deviceInfo.browser}</div>
+                        </div>
+                        <div class="device-info-item">
+                            <div class="device-info-label">Système d'exploitation</div>
+                            <div class="device-info-value">${deviceInfo.os}</div>
+                        </div>
+                        <div class="device-info-item">
+                            <div class="device-info-label">Résolution d'écran</div>
+                            <div class="device-info-value">${deviceInfo.screenResolution}</div>
+                        </div>
+                        <div class="device-info-item">
+                            <div class="device-info-label">Batterie</div>
+                            <div class="device-info-value">${deviceInfo.batteryLevel}</div>
+                        </div>
+                        <div class="device-info-item">
+                            <div class="device-info-label">Langue</div>
+                            <div class="device-info-value">${deviceInfo.language}</div>
+                        </div>
+                        <div class="device-info-item">
+                            <div class="device-info-label">Connexion</div>
+                            <div class="device-info-value">${deviceInfo.connection}</div>
+                        </div>
+                    </div>
+                `;
+
+                // Add map and device info to results
+                results.push({
+                    title: '<i class="fas fa-map"></i> Carte de localisation',
+                    content: mapContainer.outerHTML + deviceInfoHTML,
+                    badge: '<span class="badge badge-info">Carte</span>',
+                    source: 'Leaflet Maps'
+                });
+
+                // Display results first
+                displayResults(results);
+
+                // Then initialize map (need to wait for DOM update)
+                setTimeout(() => {
+                    if (data.latitude && data.longitude) {
+                        initMap(data.latitude, data.longitude, data.city || 'Localisation', ipAddress);
+                    }
+                }, 100);
+
             } catch (e) {
                 console.error('IP search error:', e);
                 results.push({
@@ -827,6 +921,90 @@
             }
 
             return results;
+        }
+
+        // Initialize Leaflet map
+        function initMap(lat, lng, locationName, ipAddress) {
+            const map = L.map('map').setView([lat, lng], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup(`<b>${locationName}</b><br>IP: ${ipAddress}`)
+                .openPopup();
+        }
+
+        // Get device information
+        function getDeviceInfo() {
+            const userAgent = navigator.userAgent;
+            let browser = 'Inconnu';
+            let os = 'Inconnu';
+            
+            // Detect browser
+            if (userAgent.includes('Firefox')) {
+                browser = 'Firefox';
+            } else if (userAgent.includes('Chrome')) {
+                browser = 'Chrome';
+            } else if (userAgent.includes('Safari')) {
+                browser = 'Safari';
+            } else if (userAgent.includes('Edge')) {
+                browser = 'Edge';
+            } else if (userAgent.includes('Opera')) {
+                browser = 'Opera';
+            } else if (userAgent.includes('MSIE') || userAgent.includes('Trident/')) {
+                browser = 'Internet Explorer';
+            }
+            
+            // Detect OS
+            if (userAgent.includes('Windows')) {
+                os = 'Windows';
+            } else if (userAgent.includes('Mac')) {
+                os = 'macOS';
+            } else if (userAgent.includes('Linux')) {
+                os = 'Linux';
+            } else if (userAgent.includes('Android')) {
+                os = 'Android';
+            } else if (userAgent.includes('iOS') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+                os = 'iOS';
+            }
+            
+            // Get battery info if available
+            let batteryLevel = 'Non disponible';
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(battery => {
+                    batteryLevel = `${Math.round(battery.level * 100)}% ${battery.charging ? '(En charge)' : ''}`;
+                    document.querySelector('.device-info-value').textContent = batteryLevel;
+                });
+            }
+            
+            // Get screen resolution
+            const screenResolution = `${window.screen.width}x${window.screen.height}`;
+            
+            // Get language
+            const language = navigator.language || navigator.userLanguage || 'Inconnu';
+            
+            // Get connection info
+            let connection = 'Inconnu';
+            if ('connection' in navigator) {
+                const conn = navigator.connection;
+                if (conn) {
+                    connection = `${conn.effectiveType || 'Inconnu'}`;
+                    if (conn.downlink) {
+                        connection += ` ~${Math.round(conn.downlink)} Mbps`;
+                    }
+                }
+            }
+            
+            return {
+                browser,
+                os,
+                batteryLevel,
+                screenResolution,
+                language,
+                connection
+            };
         }
 
         // Validation améliorée des IP
@@ -1007,6 +1185,7 @@
 
         function displayResults(results) {
             const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
 
             if (results.length === 0) {
                 container.innerHTML = `
@@ -1026,7 +1205,7 @@
                 card.innerHTML = `
                     <div class="result-title">${result.title} ${result.badge || ''}</div>
                     <div class="result-content">${result.content}</div>
-                    <div class="result-source"><i class="fas fa-database"></i> Source: ${result.source}</div>
+                    ${result.source ? `<div class="result-source"><i class="fas fa-database"></i> Source: ${result.source}</div>` : ''}
                 `;
 
                 container.appendChild(card);
