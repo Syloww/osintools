@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,45 +18,45 @@
             --danger: #dc3545;
             --info: #17a2b8;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
             background-color: var(--light);
             color: var(--dark);
             line-height: 1.6;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
         }
-        
+
         header {
             text-align: center;
             margin-bottom: 2rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
-        
+
         h1 {
             color: var(--secondary);
             margin-bottom: 0.5rem;
             font-size: 2.5rem;
         }
-        
+
         .subtitle {
             color: var(--primary);
             font-weight: 300;
             font-size: 1.1rem;
         }
-        
+
         .search-section {
             background: white;
             border-radius: 10px;
@@ -63,19 +64,19 @@
             padding: 2rem;
             margin-bottom: 2rem;
         }
-        
+
         .search-form {
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
         }
-        
+
         .input-group {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
-        
+
         label {
             font-weight: 600;
             color: var(--secondary);
@@ -83,25 +84,27 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         label i {
             color: var(--primary);
         }
-        
-        input, select {
+
+        input,
+        select {
             padding: 0.8rem 1rem;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
             transition: border 0.3s ease;
         }
-        
-        input:focus, select:focus {
+
+        input:focus,
+        select:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.2);
         }
-        
+
         button {
             background-color: var(--primary);
             color: white;
@@ -117,13 +120,13 @@
             justify-content: center;
             gap: 0.5rem;
         }
-        
+
         button:hover {
             background-color: var(--secondary);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         .results-section {
             background: white;
             border-radius: 10px;
@@ -131,7 +134,7 @@
             padding: 2rem;
             min-height: 300px;
         }
-        
+
         .results-header {
             display: flex;
             justify-content: space-between;
@@ -140,13 +143,13 @@
             padding-bottom: 1rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
-        
+
         .results-content {
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
         }
-        
+
         .result-card {
             background: #f8f9fa;
             border-radius: 8px;
@@ -155,11 +158,11 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease;
         }
-        
+
         .result-card:hover {
             transform: translateY(-3px);
         }
-        
+
         .result-title {
             font-weight: 700;
             color: var(--secondary);
@@ -169,21 +172,21 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .result-content {
             line-height: 1.7;
         }
-        
+
         .result-content a {
             color: var(--primary);
             text-decoration: none;
             font-weight: 500;
         }
-        
+
         .result-content a:hover {
             text-decoration: underline;
         }
-        
+
         .result-source {
             margin-top: 1rem;
             font-size: 0.85rem;
@@ -192,7 +195,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
+
         .loading {
             display: flex;
             justify-content: center;
@@ -201,7 +204,7 @@
             flex-direction: column;
             gap: 1rem;
         }
-        
+
         .spinner {
             width: 50px;
             height: 50px;
@@ -210,11 +213,13 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .error {
             color: var(--danger);
             background: #f8d7da;
@@ -225,11 +230,11 @@
             align-items: center;
             gap: 1rem;
         }
-        
+
         .hidden {
             display: none;
         }
-        
+
         footer {
             text-align: center;
             margin-top: 3rem;
@@ -238,7 +243,7 @@
             color: #666;
             font-size: 0.9rem;
         }
-        
+
         .badge {
             display: inline-block;
             padding: 0.25rem 0.5rem;
@@ -248,33 +253,33 @@
             margin-right: 0.5rem;
             margin-bottom: 0.5rem;
         }
-        
+
         .badge-success {
             background-color: #d4edda;
             color: var(--success);
         }
-        
+
         .badge-warning {
             background-color: #fff3cd;
             color: var(--warning);
         }
-        
+
         .badge-danger {
             background-color: #f8d7da;
             color: var(--danger);
         }
-        
+
         .badge-info {
             background-color: #d1ecf1;
             color: var(--info);
         }
-        
+
         .tooltip {
             position: relative;
             display: inline-block;
             cursor: pointer;
         }
-        
+
         .tooltip .tooltiptext {
             visibility: hidden;
             width: 200px;
@@ -293,12 +298,12 @@
             font-size: 0.8rem;
             font-weight: normal;
         }
-        
+
         .tooltip:hover .tooltiptext {
             visibility: visible;
             opacity: 1;
         }
-        
+
         .api-info {
             background-color: #e7f5ff;
             padding: 1rem;
@@ -306,47 +311,48 @@
             margin-top: 1rem;
             font-size: 0.9rem;
         }
-        
+
         .tab-container {
             display: flex;
             margin-bottom: 1rem;
             border-bottom: 1px solid #ddd;
         }
-        
+
         .tab {
             padding: 0.75rem 1.5rem;
             cursor: pointer;
             border-bottom: 3px solid transparent;
             transition: all 0.3s ease;
         }
-        
+
         .tab.active {
             border-bottom-color: var(--primary);
             font-weight: 600;
             color: var(--primary);
         }
-        
+
         .tab-content {
             display: none;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
+
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
             }
-            
-            .search-section, .results-section {
+
+            .search-section,
+            .results-section {
                 padding: 1.5rem;
             }
-            
+
             h1 {
                 font-size: 2rem;
             }
-            
+
             .results-header {
                 flex-direction: column;
                 align-items: flex-start;
@@ -355,13 +361,14 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
             <h1><i class="fas fa-search"></i> OSINTool Pro</h1>
             <p class="subtitle">Outil avancé de recherche en sources ouvertes</p>
         </header>
-        
+
         <section class="search-section">
             <form class="search-form" id="searchForm">
                 <div class="input-group">
@@ -376,38 +383,40 @@
                         <option value="person">Personne (nom/prénom)</option>
                     </select>
                 </div>
-                
+
                 <div class="input-group">
                     <label for="searchQuery"><i class="fas fa-search"></i> Entrez votre recherche</label>
-                    <input type="text" id="searchQuery" placeholder="Ex: +33123456789, example@domain.com, ou 192.168.1.1" required>
+                    <input type="text" id="searchQuery"
+                        placeholder="Ex: +33123456789, example@domain.com, ou 192.168.1.1" required>
                 </div>
-                
+
                 <button type="submit" id="searchButton">
                     <i class="fas fa-search"></i> Rechercher
                 </button>
-                
+
                 <div class="api-info">
-                    <i class="fas fa-info-circle"></i> Cet outil utilise des API publiques fiables : AbstractAPI (email/téléphone), IPGeolocation, WHOIS, et des techniques OSINT standards.
+                    <i class="fas fa-info-circle"></i> Cet outil utilise des API publiques fiables : AbstractAPI
+                    (email/téléphone), IPGeolocation, WHOIS, et des techniques OSINT standards.
                 </div>
             </form>
         </section>
-        
+
         <section class="results-section">
             <div class="results-header">
                 <h2><i class="fas fa-list"></i> Résultats</h2>
                 <div id="searchStatus"></div>
             </div>
-            
+
             <div class="results-content" id="resultsContent">
                 <div id="initialMessage">
                     <p>Entrez une recherche pour commencer. L'outil interrogera diverses sources ouvertes.</p>
-                    
+
                     <div class="tab-container">
                         <div class="tab active" data-tab="features">Fonctionnalités</div>
                         <div class="tab" data-tab="apis">API utilisées</div>
                         <div class="tab" data-tab="tips">Conseils</div>
                     </div>
-                    
+
                     <div class="tab-content active" id="features-tab">
                         <p><strong>Fonctionnalités disponibles :</strong></p>
                         <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
@@ -419,7 +428,7 @@
                             <li>Recherche de personnes (nom/prénom)</li>
                         </ul>
                     </div>
-                    
+
                     <div class="tab-content" id="apis-tab">
                         <p><strong>API et sources utilisées :</strong></p>
                         <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
@@ -430,7 +439,7 @@
                             <li><strong>SocialLinks</strong> : Recherche de noms d'utilisateur</li>
                         </ul>
                     </div>
-                    
+
                     <div class="tab-content" id="tips-tab">
                         <p><strong>Conseils pour une meilleure recherche :</strong></p>
                         <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
@@ -441,24 +450,26 @@
                         </ul>
                     </div>
                 </div>
-                
+
                 <div id="loadingIndicator" class="loading hidden">
                     <div class="spinner"></div>
                     <p>Analyse en cours...</p>
                 </div>
-                
+
                 <div id="errorMessage" class="error hidden">
                     <i class="fas fa-exclamation-triangle"></i>
                     <div id="errorText"></div>
                 </div>
-                
+
                 <div id="resultsContainer"></div>
             </div>
         </section>
-        
+
         <footer>
-            <p><i class="fas fa-shield-alt"></i> Cet outil est destiné à des fins légales et éthiques uniquement. Respectez toujours les lois sur la vie privée.</p>
-            <p style="margin-top: 0.5rem;">OSINTool Pro v2.0 - Utilise des techniques OSINT standards et des API publiques</p>
+            <p><i class="fas fa-shield-alt"></i> Cet outil est destiné à des fins légales et éthiques uniquement.
+                Respectez toujours les lois sur la vie privée.</p>
+            <p style="margin-top: 0.5rem;">OSINTool Pro v2.0 - Utilise des techniques OSINT standards et des API
+                publiques</p>
         </footer>
     </div>
 
@@ -469,7 +480,7 @@
                 // Remove active class from all tabs and contents
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
+
                 // Add active class to clicked tab and corresponding content
                 tab.classList.add('active');
                 const tabId = tab.getAttribute('data-tab');
@@ -477,19 +488,19 @@
             });
         });
 
-        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+        document.getElementById('searchForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const searchType = document.getElementById('searchType').value;
             const searchQuery = document.getElementById('searchQuery').value.trim();
             const searchButton = document.getElementById('searchButton');
-            
+
             // Validate input
             if (!searchType || !searchQuery) {
                 showError('Veuillez sélectionner un type de recherche et entrer une requête');
                 return;
             }
-            
+
             // Show loading indicator
             document.getElementById('initialMessage').classList.add('hidden');
             document.getElementById('loadingIndicator').classList.remove('hidden');
@@ -498,11 +509,11 @@
             document.getElementById('searchStatus').textContent = 'Recherche en cours...';
             searchButton.disabled = true;
             searchButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Recherche en cours...';
-            
+
             try {
                 let results = [];
-                
-                switch(searchType) {
+
+                switch (searchType) {
                     case 'phone':
                         results = await searchPhoneNumber(searchQuery);
                         break;
@@ -524,7 +535,7 @@
                     default:
                         throw new Error('Type de recherche non supporté');
                 }
-                
+
                 displayResults(results);
                 document.getElementById('searchStatus').textContent = `${results.length} résultat(s) trouvé(s)`;
                 document.getElementById('searchStatus').style.color = results.length ? 'var(--success)' : 'var(--warning)';
@@ -539,15 +550,15 @@
                 searchButton.innerHTML = '<i class="fas fa-search"></i> Rechercher';
             }
         });
-        
+
         function showError(message) {
             document.getElementById('errorText').textContent = message;
             document.getElementById('errorMessage').classList.remove('hidden');
         }
-        
+
         async function searchEmail(email) {
             const results = [];
-            
+
             // 1. Validate email syntax first
             const validationResult = validateEmailSyntax(email);
             results.push({
@@ -556,16 +567,16 @@
                 badge: validationResult.valid ? '<span class="badge badge-success">Valide</span>' : '<span class="badge badge-danger">Invalide</span>',
                 source: 'Validation syntaxique'
             });
-            
+
             if (!validationResult.valid) {
                 return results;
             }
-            
+
             // 2. Check email with AbstractAPI (free tier)
             try {
                 const response = await fetch(`https://emailvalidation.abstractapi.com/v1/?api_key=YOUR_ABSTRACT_API_KEY&email=${encodeURIComponent(email)}`);
                 const data = await response.json();
-                
+
                 if (data.is_valid_format?.value === false) {
                     results.push({
                         title: '<i class="fas fa-times-circle"></i> Format email',
@@ -575,10 +586,10 @@
                     });
                     return results;
                 }
-                
+
                 let deliverabilityStatus = '';
                 let deliverabilityBadge = '';
-                
+
                 if (data.deliverability === 'DELIVERABLE') {
                     deliverabilityStatus = 'Cet email est probablement livrable';
                     deliverabilityBadge = '<span class="badge badge-success">Livrable</span>';
@@ -589,14 +600,14 @@
                     deliverabilityStatus = 'Statut de livraison inconnu';
                     deliverabilityBadge = '<span class="badge badge-warning">Inconnu</span>';
                 }
-                
+
                 results.push({
                     title: '<i class="fas fa-truck"></i> Livrabilité email',
                     content: deliverabilityStatus,
                     badge: deliverabilityBadge,
                     source: 'AbstractAPI'
                 });
-                
+
                 // Check if it's a disposable email
                 if (data.is_disposable_email?.value) {
                     results.push({
@@ -606,7 +617,7 @@
                         source: 'AbstractAPI'
                     });
                 }
-                
+
                 // Check if it's a free email
                 if (data.is_free_email?.value) {
                     results.push({
@@ -625,7 +636,7 @@
                     source: 'AbstractAPI'
                 });
             }
-            
+
             // 3. Check for breaches with Have I Been Pwned (no API key needed)
             try {
                 const response = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(email)}?truncateResponse=false`, {
@@ -633,7 +644,7 @@
                         'User-Agent': 'OSINTool-Pro'
                     }
                 });
-                
+
                 if (response.status === 404) {
                     results.push({
                         title: '<i class="fas fa-shield-alt"></i> Fuites de données',
@@ -643,10 +654,10 @@
                     });
                 } else if (response.ok) {
                     const breaches = await response.json();
-                    const breachList = breaches.map(b => 
+                    const breachList = breaches.map(b =>
                         `<strong>${b.Name}</strong> (${new Date(b.BreachDate).toLocaleDateString()}) - ${b.Description}`
                     ).join('<br><br>');
-                    
+
                     results.push({
                         title: '<i class="fas fa-exclamation-triangle"></i> Fuites de données',
                         content: `Cette adresse email a été compromise dans ${breaches.length} fuites:<br><br>${breachList}`,
@@ -663,146 +674,167 @@
                     source: 'Have I Been Pwned'
                 });
             }
-            
+
             return results;
         }
-        
+
         function validateEmailSyntax(email) {
             const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             return {
                 valid: isValid,
-                message: isValid 
+                message: isValid
                     ? 'Format email valide'
                     : 'Format email invalide - doit contenir un @ et un domaine valide'
             };
         }
-        
+
         async function searchPhoneNumber(phoneNumber) {
             const results = [];
-            
-            // 1. Validate with AbstractAPI
+
+            // Normalisation du numéro (supprime tous les caractères non numériques)
+            const normalizedPhone = phoneNumber.replace(/[^\d+]/g, '');
+
+            // Validation de base
+            if (!normalizedPhone.match(/^\+?[\d\s]{8,}$/)) {
+                results.push({
+                    title: '<i class="fas fa-times-circle"></i> Format invalide',
+                    content: 'Le numéro doit contenir au moins 8 chiffres. Format international recommandé: +33123456789',
+                    badge: '<span class="badge badge-danger">Invalide</span>',
+                    source: 'Validation'
+                });
+                return results;
+            }
+
+            // Utilisation d'une API gratuite
             try {
-                const response = await fetch(`https://phonevalidation.abstractapi.com/v1/?api_key=YOUR_ABSTRACT_API_KEY&phone=${encodeURIComponent(phoneNumber)}`);
+                const response = await fetch(`https://phonevalidation.abstractapi.com/v1/?api_key=YOUR_API_KEY&phone=${normalizedPhone}`);
                 const data = await response.json();
-                
+
                 if (!data.valid) {
                     results.push({
                         title: '<i class="fas fa-times-circle"></i> Numéro invalide',
-                        content: 'Ce numéro de téléphone est invalide',
+                        content: data.error?.message || 'Ce numéro n\'est pas valide',
                         badge: '<span class="badge badge-danger">Invalide</span>',
                         source: 'AbstractAPI'
                     });
                     return results;
                 }
-                
+
                 results.push({
                     title: '<i class="fas fa-check-circle"></i> Numéro valide',
                     content: 'Ce numéro de téléphone est valide',
                     badge: '<span class="badge badge-success">Valide</span>',
                     source: 'AbstractAPI'
                 });
-                
-                // Add location info
+
+                // Format international standardisé
+                const intlFormat = data.format?.international || normalizedPhone;
+                results.push({
+                    title: '<i class="fas fa-phone-alt"></i> Format international',
+                    content: intlFormat,
+                    badge: '<span class="badge badge-info">Standard</span>',
+                    source: 'AbstractAPI'
+                });
+
+                // Informations de localisation
                 results.push({
                     title: '<i class="fas fa-globe-europe"></i> Localisation',
                     content: `
-                        Pays: ${data.country?.name || 'Inconnu'} (${data.country?.code || '?'})<br>
-                        Opérateur: ${data.carrier || 'Inconnu'}<br>
-                        Type: ${data.type || 'Inconnu'}<br>
-                        Format international: ${data.format?.international || 'Inconnu'}
-                    `,
+                <strong>Pays:</strong> ${data.country?.name || 'Inconnu'}<br>
+                <strong>Code:</strong> +${data.country?.prefix || '?'}<br>
+                <strong>Opérateur:</strong> ${data.carrier || 'Inconnu'}<br>
+                <strong>Type:</strong> ${data.type || 'Inconnu'}
+            `,
                     badge: `<span class="badge badge-info">${data.country?.name || 'Localisation'}</span>`,
                     source: 'AbstractAPI'
                 });
-                
-                // Check if it's a mobile number
-                if (data.type?.toLowerCase() === 'mobile') {
-                    results.push({
-                        title: '<i class="fas fa-mobile-alt"></i> Type de numéro',
-                        content: 'Ce numéro est un numéro de mobile',
-                        badge: '<span class="badge badge-info">Mobile</span>',
-                        source: 'AbstractAPI'
-                    });
-                }
+
             } catch (e) {
                 console.error('Phone validation error:', e);
                 results.push({
-                    title: '<i class="fas fa-exclamation-triangle"></i> Erreur de validation',
-                    content: 'Impossible de valider le numéro de téléphone',
+                    title: '<i class="fas fa-exclamation-triangle"></i> Erreur',
+                    content: 'Service temporairement indisponible. Essayez avec un format international: +33123456789',
                     badge: '<span class="badge badge-warning">Erreur</span>',
                     source: 'AbstractAPI'
                 });
             }
-            
+
             return results;
         }
-        
         async function searchIP(ipAddress) {
             const results = [];
-            
-            // Validate IP format first
+
+            // Validation améliorée de l'IP
             if (!isValidIP(ipAddress)) {
                 results.push({
                     title: '<i class="fas fa-times-circle"></i> IP invalide',
-                    content: 'Cette adresse IP est invalide',
+                    content: 'Format d\'adresse IP invalide. Utilisez une IPv4 (ex: 8.8.8.8) ou IPv6',
                     badge: '<span class="badge badge-danger">Invalide</span>',
                     source: 'Validation'
                 });
                 return results;
             }
-            
-            // Check with IPGeolocation API
+
+            // Utilisation d'une API gratuite et fiable
             try {
-                const response = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=YOUR_IPGEOLOCATION_KEY&ip=${ipAddress}`);
+                const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
                 const data = await response.json();
-                
+
+                if (data.error) {
+                    throw new Error(data.reason || 'Erreur de l\'API');
+                }
+
                 results.push({
                     title: '<i class="fas fa-map-marker-alt"></i> Géolocalisation',
                     content: `
-                        <strong>Pays:</strong> ${data.country_name} (${data.country_code2})<br>
-                        <strong>Ville:</strong> ${data.city || 'Inconnue'}<br>
-                        <strong>Région:</strong> ${data.state_prov || 'Inconnue'}<br>
-                        <strong>Code postal:</strong> ${data.zipcode || 'Inconnu'}<br>
-                        <strong>Coordonnées:</strong> ${data.latitude}, ${data.longitude}<br>
-                        <strong>FAI:</strong> ${data.isp || 'Inconnu'}<br>
-                        <strong>Type de connexion:</strong> ${data.connection_type || 'Inconnu'}<br>
-                        <strong>Fuseau horaire:</strong> ${data.time_zone?.name || 'Inconnu'}
-                    `,
+                <strong>IP:</strong> ${data.ip || ipAddress}<br>
+                <strong>Pays:</strong> ${data.country_name} (${data.country_code})<br>
+                <strong>Ville:</strong> ${data.city || 'Inconnue'}<br>
+                <strong>Région:</strong> ${data.region || 'Inconnue'}<br>
+                <strong>Code postal:</strong> ${data.postal || 'Inconnu'}<br>
+                <strong>FAI:</strong> ${data.org || 'Inconnu'}<br>
+                <strong>Fuseau horaire:</strong> ${data.timezone || 'Inconnu'}
+            `,
                     badge: `<span class="badge badge-info">${data.country_name || 'Localisation'}</span>`,
-                    source: 'IPGeolocation'
+                    source: 'ipapi.co'
                 });
-                
-                // Check if it's a proxy/VPN
-                if (data.is_proxy) {
+
+                // Détection proxy/VPN
+                if (data.proxy || data.vpn) {
                     results.push({
-                        title: '<i class="fas fa-user-secret"></i> Proxy/VPN détecté',
-                        content: 'Cette IP est associée à un service proxy ou VPN',
-                        badge: '<span class="badge badge-warning">Proxy</span>',
-                        source: 'IPGeolocation'
+                        title: '<i class="fas fa-user-secret"></i> Anonymisation',
+                        content: 'Cette IP est associée à un service proxy/VPN',
+                        badge: '<span class="badge badge-warning">Proxy/VPN</span>',
+                        source: 'ipapi.co'
                     });
                 }
             } catch (e) {
-                console.error('IP geolocation error:', e);
+                console.error('IP search error:', e);
                 results.push({
-                    title: '<i class="fas fa-exclamation-triangle"></i> Erreur de géolocalisation',
-                    content: 'Impossible de géolocaliser cette adresse IP',
-                    badge: '<span class="badge badge-warning">Erreur</span>',
-                    source: 'IPGeolocation'
+                    title: '<i class="fas fa-exclamation-triangle"></i> Erreur',
+                    content: 'Impossible de géolocaliser cette IP. Essayez avec une IP publique.',
+                    badge: '<span class="badge badge-danger">Erreur</span>',
+                    source: 'ipapi.co'
                 });
             }
-            
+
             return results;
         }
-        
+
+        // Validation améliorée des IP
         function isValidIP(ip) {
-            // Simple IPv4 validation
+            // IPv4
             const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-            return ipv4Regex.test(ip);
+
+            // IPv6 (simplifiée)
+            const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+
+            return ipv4Regex.test(ip) || ipv6Regex.test(ip);
         }
-        
+
         async function searchDomain(domain) {
             const results = [];
-            
+
             // Validate domain format first
             if (!isValidDomain(domain)) {
                 results.push({
@@ -813,7 +845,7 @@
                 });
                 return results;
             }
-            
+
             // WHOIS information
             results.push({
                 title: '<i class="fas fa-info-circle"></i> Informations WHOIS',
@@ -821,35 +853,35 @@
                 badge: '<span class="badge badge-info">WHOIS</span>',
                 source: 'WHOIS.com'
             });
-            
+
             // Check domain age
             try {
                 const response = await fetch(`https://api.whoapi.com/?domain=${domain}&r=whois&apikey=YOUR_WHOAPI_KEY`);
                 const data = await response.json();
-                
+
                 if (data.created) {
                     const createdDate = new Date(data.created);
                     const ageInDays = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
-                    
+
                     results.push({
                         title: '<i class="fas fa-calendar-alt"></i> Âge du domaine',
                         content: `
                             Créé le: ${createdDate.toLocaleDateString()}<br>
-                            Âge: ~${ageInDays} jours (${Math.floor(ageInDays/365)} ans)
+                            Âge: ~${ageInDays} jours (${Math.floor(ageInDays / 365)} ans)
                         `,
-                        badge: `<span class="badge badge-info">${Math.floor(ageInDays/365)} ans</span>`,
+                        badge: `<span class="badge badge-info">${Math.floor(ageInDays / 365)} ans</span>`,
                         source: 'WHOAPI'
                     });
                 }
             } catch (e) {
                 console.warn('Domain age check error:', e);
             }
-            
+
             // Check SSL certificate
             try {
                 const response = await fetch(`https://api.ssllabs.com/api/v3/analyze?host=${domain}`);
                 const data = await response.json();
-                
+
                 if (data.status === 'READY') {
                     const grade = data.endpoints[0]?.grade || 'Inconnu';
                     results.push({
@@ -862,19 +894,19 @@
             } catch (e) {
                 console.warn('SSL check error:', e);
             }
-            
+
             return results;
         }
-        
+
         function isValidDomain(domain) {
             // Simple domain validation
             const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
             return domainRegex.test(domain);
         }
-        
+
         async function searchUsername(username) {
             const results = [];
-            
+
             // Check various social networks
             const socialNetworks = [
                 { name: 'Twitter', url: `https://twitter.com/${username}`, icon: 'fab fa-twitter' },
@@ -886,7 +918,7 @@
                 { name: 'YouTube', url: `https://youtube.com/user/${username}`, icon: 'fab fa-youtube' },
                 { name: 'TikTok', url: `https://tiktok.com/@${username}`, icon: 'fab fa-tiktok' }
             ];
-            
+
             // Check which profiles exist
             const profileChecks = await Promise.all(socialNetworks.map(async network => {
                 try {
@@ -896,13 +928,13 @@
                     return { ...network, exists: false };
                 }
             }));
-            
+
             const existingProfiles = profileChecks.filter(p => p.exists);
-            
+
             if (existingProfiles.length > 0) {
                 results.push({
                     title: '<i class="fas fa-user-check"></i> Profils trouvés',
-                    content: existingProfiles.map(n => 
+                    content: existingProfiles.map(n =>
                         `<a href="${n.url}" target="_blank" rel="noopener noreferrer"><i class="${n.icon}"></i> ${n.name}</a>`
                     ).join(' | '),
                     badge: `<span class="badge badge-success">${existingProfiles.length} profil(s)</span>`,
@@ -916,7 +948,7 @@
                     source: 'Réseaux sociaux'
                 });
             }
-            
+
             // Check username on other services
             results.push({
                 title: '<i class="fas fa-search-plus"></i> Autres vérifications',
@@ -929,13 +961,13 @@
                 badge: '<span class="badge badge-info">Outils</span>',
                 source: 'Services tiers'
             });
-            
+
             return results;
         }
-        
+
         async function searchPerson(name) {
             const results = [];
-            
+
             // Basic name validation
             if (!name.includes(' ')) {
                 results.push({
@@ -946,7 +978,7 @@
                 });
                 return results;
             }
-            
+
             // Search suggestions
             results.push({
                 title: '<i class="fas fa-user-tag"></i> Recherche de personne',
@@ -961,13 +993,13 @@
                 badge: '<span class="badge badge-info">Ressources</span>',
                 source: 'Services de recherche'
             });
-            
+
             return results;
         }
-        
+
         function displayResults(results) {
             const container = document.getElementById('resultsContainer');
-            
+
             if (results.length === 0) {
                 container.innerHTML = `
                     <div class="result-card">
@@ -978,20 +1010,21 @@
                 `;
                 return;
             }
-            
+
             results.forEach(result => {
                 const card = document.createElement('div');
                 card.className = 'result-card';
-                
+
                 card.innerHTML = `
                     <div class="result-title">${result.title} ${result.badge || ''}</div>
                     <div class="result-content">${result.content}</div>
                     <div class="result-source"><i class="fas fa-database"></i> Source: ${result.source}</div>
                 `;
-                
+
                 container.appendChild(card);
             });
         }
     </script>
 </body>
+
 </html>
