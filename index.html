@@ -11,7 +11,595 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    <link rel="stylesheet" href="styles/index.css">
+    <style>
+        :root {
+            --primary: #3a5a78;
+            --secondary: #2c3e50;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --accent: #4fc3f7;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --text: #333;
+            --background: #f8f9fa;
+            --card-bg: #fff;
+            --border: rgba(0, 0, 0, 0.1);
+            --badge-bg: #f0f4f8;
+            --input-padding: 0.75rem 1rem;
+        }
+
+        [data-theme="dark"] {
+            --primary: #4fc3f7;
+            --secondary: #3a5a78;
+            --dark: #0d1117;
+            --light: #f8f9fa;
+            --accent: #4fc3f7;
+            --text: #f0f0f0;
+            --background: #161b22;
+            --card-bg: #0d1117;
+            --border: rgba(255, 255, 255, 0.15);
+            --badge-bg: #21262d;
+            --badge-success-bg: rgba(46, 160, 67, 0.1);
+            --badge-warning-bg: rgba(187, 128, 9, 0.1);
+            --badge-danger-bg: rgba(248, 81, 73, 0.1);
+            --badge-info-bg: rgba(56, 139, 253, 0.1);
+            --api-info-bg: rgba(65, 132, 228, 0.1);
+            --error-bg: rgba(248, 81, 73, 0.1);
+            --device-info-bg: #21262d;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .search-section,
+        .results-section,
+        .result-card,
+        .device-info-item {
+            background: var(--card-bg);
+            transition: background-color 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        header, footer, .results-header {
+            border-color: var(--border);
+        }
+
+        input,
+        select {
+            background-color: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            padding: var(--input-padding);
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary);
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Améliorations spécifiques pour le mode sombre */
+        [data-theme="dark"] {
+            h1, .subtitle, .result-title, label {
+                color: var(--light);
+            }
+            
+            .search-section, .results-section, .result-card {
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+            
+            .badge {
+                background-color: var(--badge-bg);
+            }
+            
+            .badge-success {
+                background-color: var(--badge-success-bg);
+                color: #3fb950;
+            }
+            
+            .badge-warning {
+                background-color: var(--badge-warning-bg);
+                color: #d29922;
+            }
+            
+            .badge-danger {
+                background-color: var(--badge-danger-bg);
+                color: #f85149;
+            }
+            
+            .badge-info {
+                background-color: var(--badge-info-bg);
+                color: #58a6ff;
+            }
+            
+            .api-info {
+                background-color: var(--api-info-bg);
+                color: var(--accent);
+            }
+            
+            .error {
+                background: var(--error-bg);
+                color: #f85149;
+                border-left-color: #f85149;
+            }
+            
+            .device-info-item {
+                background: var(--device-info-bg);
+            }
+            
+            .tab-container {
+                border-bottom-color: var(--border);
+            }
+            
+            .tab.active {
+                color: var(--accent);
+            }
+            
+            .tooltip .tooltiptext {
+                background-color: var(--secondary);
+                color: var(--light);
+            }
+            
+            .result-content a {
+                color: var(--accent);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+
+        h1 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: var(--primary);
+            font-weight: 300;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .search-section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        label i {
+            color: var(--primary);
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.2);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            min-height: 300px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .results-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .result-card {
+            background: var(--badge-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .result-title {
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-content {
+            line-height: 1.7;
+        }
+
+        .result-content a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .result-content a:hover {
+            text-decoration: underline;
+        }
+
+        .result-source {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text);
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--border);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error {
+            color: var(--danger);
+            background: #f8d7da;
+            padding: 1.5rem;
+            border-radius: 5px;
+            border-left: 4px solid var(--danger);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            color: var(--text);
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-success {
+            background-color: #d4edda;
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background-color: #fff3cd;
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background-color: #f8d7da;
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background-color: #d1ecf1;
+            color: var(--info);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--dark);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+            font-weight: normal;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .api-info {
+            background-color: #e7f5ff;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Map container */
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Device info */
+        .device-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .device-info-item {
+            background: var(--badge-bg);
+            padding: 0.8rem;
+            border-radius: 5px;
+        }
+
+        .device-info-label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.85rem;
+        }
+
+        .device-info-value {
+            margin-top: 0.3rem;
+            font-size: 1rem;
+        }
+
+        /* Animation pour les nouveaux résultats */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        /* Historique des recherches */
+        .search-history {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed var(--border);
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            color: var(--accent);
+        }
+
+        .history-clear {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--danger);
+            cursor: pointer;
+            text-align: right;
+        }
+
+        .history-clear:hover {
+            text-decoration: underline;
+        }
+
+        /* Style pour les écrans plus petits */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .search-section,
+            .results-section {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .device-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+            }
+
+            input, select {
+                padding: 0.65rem 0.9rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -24,142 +612,308 @@
             </button>
         </header>
 
-        <section class="search-section">
-            <form class="search-form" id="searchForm">
-                <div class="input-group">
-                    <label for="searchType"><i class="fas fa-filter"></i> Type de recherche</label>
-                    <select id="searchType" required>
-                        <option value="">-- Sélectionnez un type --</option>
-                        <option value="phone">Numéro de téléphone</option>
-                        <option value="email">Adresse email</option>
-                        <option value="username">Nom d'utilisateur</option>
-                        <option value="ip">Adresse IP</option>
-                        <option value="domain">Nom de domaine</option>
-                        <option value="person">Personne (nom/prénom)</option>
-                    </select>
-                </div>
-
-                <div class="input-group">
-                    <label for="searchQuery"><i class="fas fa-search"></i> Entrez votre recherche</label>
-                    <input type="text" id="searchQuery"
-                        placeholder="Ex: +33123456789, example@domain.com, ou 192.168.1.1" required>
-                </div>
-
-                <button type="submit" id="searchButton">
-                    <i class="fas fa-search"></i> Rechercher
-                </button>
-
-                <div class="api-info">
-                    <i class="fas fa-info-circle"></i> Cet outil utilise des API publiques fiables : AbstractAPI
-                    (email/téléphone), IPGeolocation, WHOIS, et des techniques OSINT standards.
-                </div>
-            </form>
-        </section>
-
-        <section class="results-section">
-            <div class="results-header">
-                <h2><i class="fas fa-list"></i> Résultats</h2>
-                <div id="searchStatus"></div>
-            </div>
-
-            <div class="results-content" id="resultsContent">
-                <div id="initialMessage">
-                    <p>Entrez une recherche pour commencer. L'outil interrogera diverses sources ouvertes.</p>
-
-                    <div class="tab-container">
-                        <div class="tab active" data-tab="features">Fonctionnalités</div>
-                        <div class="tab" data-tab="apis">API utilisées</div>
-                        <div class="tab" data-tab="tips">Conseils</div>
+        <main class="main-content">
+            <section class="search-section">
+                <form class="search-form" id="searchForm">
+                    <div class="input-group">
+                        <label for="searchType"><i class="fas fa-filter"></i> Type de recherche</label>
+                        <select id="searchType" required>
+                            <option value="">-- Sélectionnez un type --</option>
+                            <option value="phone">Numéro de téléphone</option>
+                            <option value="email">Adresse email</option>
+                            <option value="username">Nom d'utilisateur</option>
+                            <option value="ip">Adresse IP</option>
+                            <option value="domain">Nom de domaine</option>
+                            <option value="person">Personne (nom/prénom)</option>
+                        </select>
                     </div>
 
-                    <div class="tab-content active" id="features-tab">
-                        <p><strong>Fonctionnalités disponibles :</strong></p>
-                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                            <li>Vérification d'emails avec détection de fuites</li>
-                            <li>Géolocalisation d'adresses IP</li>
-                            <li>Recherche de noms d'utilisateur sur les réseaux sociaux</li>
-                            <li>Informations WHOIS pour les domaines</li>
-                            <li>Validation des numéros de téléphone</li>
-                            <li>Recherche de personnes (nom/prénom)</li>
-                        </ul>
+                    <div class="input-group">
+                        <label for="searchQuery"><i class="fas fa-search"></i> Entrez votre recherche</label>
+                        <input type="text" id="searchQuery" placeholder="Ex: +33123456789, example@domain.com, ou 192.168.1.1" required>
                     </div>
 
-                    <div class="tab-content" id="apis-tab">
-                        <p><strong>API et sources utilisées :</strong></p>
-                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                            <li><strong>AbstractAPI</strong> : Validation emails et téléphones</li>
-                            <li><strong>IPGeolocation</strong> : Géolocalisation IP</li>
-                            <li><strong>WHOIS</strong> : Informations sur les domaines</li>
-                            <li><strong>Hunter.io</strong> : Vérification d'emails professionnels</li>
-                            <li><strong>SocialLinks</strong> : Recherche de noms d'utilisateur</li>
-                        </ul>
+                    <button type="submit" id="searchButton">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+
+                    <div class="api-info">
+                        <i class="fas fa-info-circle"></i> Cet outil utilise des API publiques fiables : AbstractAPI (email/téléphone), IPGeolocation, WHOIS, et des techniques OSINT standards.
+                    </div>
+                </form>
+
+                <div class="search-history" id="searchHistory">
+                    <h3><i class="fas fa-history"></i> Historique des recherches</h3>
+                    <div id="historyList"></div>
+                    <div class="history-clear" id="clearHistory">Effacer l'historique</div>
+                </div>
+            </section>
+
+            <section class="results-section">
+                <div class="results-header">
+                    <h2><i class="fas fa-list"></i> Résultats</h2>
+                    <div id="searchStatus"></div>
+                </div>
+
+                <div class="results-content" id="resultsContent">
+                    <div id="initialMessage">
+                        <p>Entrez une recherche pour commencer. L'outil interrogera diverses sources ouvertes.</p>
+
+                        <div class="tab-container">
+                            <div class="tab active" data-tab="features">Fonctionnalités</div>
+                            <div class="tab" data-tab="apis">API utilisées</div>
+                            <div class="tab" data-tab="tips">Conseils</div>
+                        </div>
+
+                        <div class="tab-content active" id="features-tab">
+                            <p><strong>Fonctionnalités disponibles :</strong></p>
+                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                <li>Vérification d'emails avec détection de fuites</li>
+                                <li>Géolocalisation d'adresses IP</li>
+                                <li>Recherche de noms d'utilisateur sur les réseaux sociaux</li>
+                                <li>Informations WHOIS pour les domaines</li>
+                                <li>Validation des numéros de téléphone</li>
+                                <li>Recherche de personnes (nom/prénom)</li>
+                            </ul>
+                        </div>
+
+                        <div class="tab-content" id="apis-tab">
+                            <p><strong>API et sources utilisées :</strong></p>
+                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                <li><strong>AbstractAPI</strong> : Validation emails et téléphones</li>
+                                <li><strong>IPGeolocation</strong> : Géolocalisation IP</li>
+                                <li><strong>WHOIS</strong> : Informations sur les domaines</li>
+                                <li><strong>Hunter.io</strong> : Vérification d'emails professionnels</li>
+                                <li><strong>SocialLinks</strong> : Recherche de noms d'utilisateur</li>
+                            </ul>
+                        </div>
+
+                        <div class="tab-content" id="tips-tab">
+                            <p><strong>Conseils pour une meilleure recherche :</strong></p>
+                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                <li>Utilisez des guillemets pour les recherches exactes</li>
+                                <li>Pour les emails, essayez avec et sans le nom de domaine complet</li>
+                                <li>Pour les noms d'utilisateur, vérifiez les variations courantes</li>
+                                <li>Les recherches IP fonctionnent mieux avec les adresses publiques</li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div class="tab-content" id="tips-tab">
-                        <p><strong>Conseils pour une meilleure recherche :</strong></p>
-                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                            <li>Utilisez des guillemets pour les recherches exactes</li>
-                            <li>Pour les emails, essayez avec et sans le nom de domaine complet</li>
-                            <li>Pour les noms d'utilisateur, vérifiez les variations courantes</li>
-                            <li>Les recherches IP fonctionnent mieux avec les adresses publiques</li>
-                        </ul>
+                    <div id="loadingIndicator" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Analyse en cours...</p>
                     </div>
-                </div>
 
-                <div id="loadingIndicator" class="loading hidden">
-                    <div class="spinner"></div>
-                    <p>Analyse en cours...</p>
-                </div>
+                    <div id="errorMessage" class="error hidden">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div id="errorText"></div>
+                    </div>
 
-                <div id="errorMessage" class="error hidden">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div id="errorText"></div>
+                    <div id="resultsContainer"></div>
                 </div>
-
-                <div id="resultsContainer"></div>
-            </div>
-        </section>
+            </section>
+        </main>
 
         <footer>
-            <p><i class="fas fa-shield-alt"></i> Cet outil est destiné à des fins légales et éthiques uniquement.
-                Respectez toujours les lois sur la vie privée.</p>
-            <p style="margin-top: 0.5rem;">OSINTool v1.0 - Utilise des techniques OSINT standards et des API
-                publiques</p>
+            <p><i class="fas fa-shield-alt"></i> Cet outil est destiné à des fins légales et éthiques uniquement. Respectez toujours les lois sur la vie privée.</p>
+            <p style="margin-top: 0.5rem;">OSINTool v1.1 - Utilise des techniques OSINT standards et des API publiques</p>
         </footer>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Gestion du thème
-            const themeToggle = document.getElementById('themeToggle');
-            const body = document.body;
+      document.addEventListener('DOMContentLoaded', function () {
+    // Gestion du thème
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
 
-            // Vérifier le localStorage pour le thème
-            const currentTheme = localStorage.getItem('theme') || 'light';
+    // Vérifier le localStorage pour le thème
+    const currentTheme = localStorage.getItem('theme') || 'light';
 
-            // Appliquer le thème sauvegardé
-            if (currentTheme === 'dark') {
-                body.setAttribute('data-theme', 'dark');
-                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-            } else {
-                body.removeAttribute('data-theme');
-                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-            }
+    // Appliquer le thème sauvegardé
+    if (currentTheme === 'dark') {
+        body.setAttribute('data-theme', 'dark');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        body.removeAttribute('data-theme');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    }
 
-            // Basculer entre les thèmes
-            themeToggle.addEventListener('click', function () {
-                if (body.getAttribute('data-theme') === 'dark') {
-                    body.removeAttribute('data-theme');
-                    localStorage.setItem('theme', 'light');
-                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-                } else {
-                    body.setAttribute('data-theme', 'dark');
-                    localStorage.setItem('theme', 'dark');
-                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-                }
-            });
+    // Basculer entre les thèmes
+    themeToggle.addEventListener('click', function () {
+        if (body.getAttribute('data-theme') === 'dark') {
+            body.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        } else {
+            body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+    });
 
+    // Gestion des onglets
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Désactiver tous les onglets et contenus
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Activer l'onglet cliqué
+            this.classList.add('active');
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(`${tabId}-tab`).classList.add('active');
         });
+    });
+
+    // Gestion de l'historique des recherches
+    let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+    const historyList = document.getElementById('historyList');
+    const clearHistoryBtn = document.getElementById('clearHistory');
+
+    function updateHistoryDisplay() {
+        historyList.innerHTML = '';
+        if (searchHistory.length === 0) {
+            historyList.innerHTML = '<p style="color: var(--text); opacity: 0.7;">Aucune recherche récente</p>';
+            return;
+        }
+        
+        searchHistory.slice(0, 5).forEach(item => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <span>${item.type}: ${item.query}</span>
+                <span style="color: var(--text); opacity: 0.7;">${new Date(item.timestamp).toLocaleString()}</span>
+            `;
+            historyItem.addEventListener('click', () => {
+                document.getElementById('searchType').value = item.type;
+                document.getElementById('searchQuery').value = item.query;
+            });
+            historyList.appendChild(historyItem);
+        });
+    }
+
+    clearHistoryBtn.addEventListener('click', () => {
+        searchHistory = [];
+        localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+        updateHistoryDisplay();
+    });
+
+    updateHistoryDisplay();
+
+    // Gestion du formulaire de recherche
+    const searchForm = document.getElementById('searchForm');
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const searchType = document.getElementById('searchType').value;
+        const searchQuery = document.getElementById('searchQuery').value.trim();
+        
+        if (!searchType || !searchQuery) return;
+        
+        // Ajouter à l'historique
+        searchHistory.unshift({
+            type: searchType,
+            query: searchQuery,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Garder seulement les 10 dernières recherches
+        if (searchHistory.length > 10) {
+            searchHistory = searchHistory.slice(0, 10);
+        }
+        
+        localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+        updateHistoryDisplay();
+        
+        // Préparer l'interface pour la recherche
+        prepareSearchUI(searchType, searchQuery);
+    });
+
+    function prepareSearchUI(type, query) {
+        // Afficher l'indicateur de chargement
+        document.getElementById('initialMessage').classList.add('hidden');
+        document.getElementById('loadingIndicator').classList.remove('hidden');
+        document.getElementById('errorMessage').classList.add('hidden');
+        document.getElementById('resultsContainer').innerHTML = '';
+        
+        // Mettre à jour le statut
+        document.getElementById('searchStatus').innerHTML = `
+            <span style="color: var(--accent);">
+                <i class="fas fa-spinner fa-pulse"></i> Recherche ${type} pour "${query}"
+            </span>
+        `;
+        
+        // Ici, votre script existant prendra le relais pour effectuer la recherche réelle
+        // Cette fonction ne fait que préparer l'interface utilisateur
+    }
+
+    // Fonction pour afficher les résultats (à appeler depuis votre script existant)
+    window.displayResults = function(results) {
+        const container = document.getElementById('resultsContainer');
+        container.innerHTML = '';
+        
+        // Masquer l'indicateur de chargement
+        document.getElementById('loadingIndicator').classList.add('hidden');
+        
+        if (!results || results.length === 0) {
+            container.innerHTML = `
+                <div class="error">
+                    <i class="fas fa-info-circle"></i>
+                    <div>Aucun résultat trouvé pour cette recherche</div>
+                </div>
+            `;
+            
+            // Mettre à jour le statut
+            document.getElementById('searchStatus').innerHTML = `
+                <span style="color: var(--danger);">
+                    <i class="fas fa-times-circle"></i> Aucun résultat trouvé
+                </span>
+            `;
+            return;
+        }
+        
+        results.forEach(result => {
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            card.innerHTML = `
+                <div class="result-title">
+                    ${result.title}
+                    ${result.badges ? result.badges.join('') : ''}
+                </div>
+                <div class="result-content">${result.content}</div>
+                <div class="result-source">
+                    <i class="fas fa-database"></i> Source: ${result.source}
+                    <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.7;">
+                        ${new Date(result.timestamp || new Date()).toLocaleTimeString()}
+                    </span>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        
+        // Mettre à jour le statut
+        document.getElementById('searchStatus').innerHTML = `
+            <span style="color: var(--success);">
+                <i class="fas fa-check-circle"></i> ${results.length} résultat(s) trouvé(s)
+            </span>
+        `;
+    };
+
+    // Fonction pour afficher les erreurs (à appeler depuis votre script existant)
+    window.showSearchError = function(errorMessage) {
+        document.getElementById('loadingIndicator').classList.add('hidden');
+        document.getElementById('errorText').textContent = errorMessage;
+        document.getElementById('errorMessage').classList.remove('hidden');
+        
+        // Mettre à jour le statut
+        document.getElementById('searchStatus').innerHTML = `
+            <span style="color: var(--danger);">
+                <i class="fas fa-times-circle"></i> Erreur lors de la recherche
+            </span>
+        `;
+    };
+});
     </script>
     <script src="js/osint.js"></script>
 </body>
