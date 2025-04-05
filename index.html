@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSINTool Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <style>
         :root {
             --primary: #3a5a78;
@@ -473,6 +479,8 @@
         </footer>
     </div>
 
+
+
     <script>
         // Gestion des onglets
         document.querySelectorAll('.tab').forEach(tab => {
@@ -764,266 +772,307 @@
         async function searchIP(ipAddress) {
             const results = [];
 
-            // Validation améliorée de l'IP
             if (!isValidIP(ipAddress)) {
                 results.push({
                     title: '<i class="fas fa-times-circle"></i> IP invalide',
-                    content: 'Format d\'adresse IP invalide. Utilisez une IPv4 (ex: 8.8.8.8) ou IPv6',
+                    content: 'Format attendu : IPv4 (93.184.216.34) ou IPv6',
                     badge: '<span class="badge badge-danger">Invalide</span>',
                     source: 'Validation'
                 });
                 return results;
             }
 
-            // Utilisation d'une API gratuite et fiable
             try {
-                const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+                // 1. Récupération des données complètes
+                const response = await fetch(`https://ipinfo.io/${ipAddress}?token=VOTRE_CLE_IPINFO`);
                 const data = await response.json();
 
-                if (data.error) {
-                    throw new Error(data.reason || 'Erreur de l\'API');
-                }
-
+                // 2. Affichage des informations détaillées
                 results.push({
-                    title: '<i class="fas fa-map-marker-alt"></i> Géolocalisation',
+                    title: '<i class="fas fa-map-marker-alt"></i> Localisation',
                     content: `
-                <strong>IP:</strong> ${data.ip || ipAddress}<br>
-                <strong>Pays:</strong> ${data.country_name} (${data.country_code})<br>
+                <strong>IP:</strong> ${data.ip}<br>
                 <strong>Ville:</strong> ${data.city || 'Inconnue'}<br>
                 <strong>Région:</strong> ${data.region || 'Inconnue'}<br>
+                <strong>Pays:</strong> ${data.country} (${data.country_name || 'Inconnu'})<br>
                 <strong>Code postal:</strong> ${data.postal || 'Inconnu'}<br>
-                <strong>FAI:</strong> ${data.org || 'Inconnu'}<br>
-                <strong>Fuseau horaire:</strong> ${data.timezone || 'Inconnu'}
+                <strong>Coordonnées:</strong> ${data.loc || 'Non disponibles'}
             `,
-                    badge: `<span class="badge badge-info">${data.country_name || 'Localisation'}</span>`,
-                    source: 'ipapi.co'
+                    badge: `<span class="badge badge-info">${data.country || 'Localisation'}</span>`,
+                    source: 'ipinfo.io'
                 });
 
-                // Détection proxy/VPN
-                if (data.proxy || data.vpn) {
-                    results.push({
-                        title: '<i class="fas fa-user-secret"></i> Anonymisation',
-                        content: 'Cette IP est associée à un service proxy/VPN',
-                        badge: '<span class="badge badge-warning">Proxy/VPN</span>',
-                        source: 'ipapi.co'
-                    });
-                }
-            } catch (e) {
-                console.error('IP search error:', e);
-                results.push({
-                    title: '<i class="fas fa-exclamation-triangle"></i> Erreur',
-                    content: 'Impossible de géolocaliser cette IP. Essayez avec une IP publique.',
-                    badge: '<span class="badge badge-danger">Erreur</span>',
-                    source: 'ipapi.co'
-                });
-            }
-
-            return results;
-        }
-
-        // Validation améliorée des IP
-        function isValidIP(ip) {
-            // IPv4
-            const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-
-            // IPv6 (simplifiée)
-            const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
-
-            return ipv4Regex.test(ip) || ipv6Regex.test(ip);
-        }
-
-        async function searchDomain(domain) {
-            const results = [];
-
-            // Validate domain format first
-            if (!isValidDomain(domain)) {
-                results.push({
-                    title: '<i class="fas fa-times-circle"></i> Domaine invalide',
-                    content: 'Ce nom de domaine est invalide',
-                    badge: '<span class="badge badge-danger">Invalide</span>',
-                    source: 'Validation'
-                });
-                return results;
-            }
-
-            // WHOIS information
-            results.push({
-                title: '<i class="fas fa-info-circle"></i> Informations WHOIS',
-                content: `Les informations WHOIS complètes sont disponibles sur <a href="https://www.whois.com/whois/${domain}" target="_blank">whois.com</a>`,
-                badge: '<span class="badge badge-info">WHOIS</span>',
-                source: 'WHOIS.com'
-            });
-
-            // Check domain age
-            try {
-                const response = await fetch(`https://api.whoapi.com/?domain=${domain}&r=whois&apikey=YOUR_WHOAPI_KEY`);
-                const data = await response.json();
-
-                if (data.created) {
-                    const createdDate = new Date(data.created);
-                    const ageInDays = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+                // 3. Carte Leaflet (sera affichée dans le contenu)
+                if (data.loc) {
+                    const [lat, lng] = data.loc.split(',');
+                    const mapId = `map-${Date.now()}`;
 
                     results.push({
-                        title: '<i class="fas fa-calendar-alt"></i> Âge du domaine',
+                        title: '<i class="fas fa-map"></i> Carte de localisation',
                         content: `
-                            Créé le: ${createdDate.toLocaleDateString()}<br>
-                            Âge: ~${ageInDays} jours (${Math.floor(ageInDays / 365)} ans)
-                        `,
-                        badge: `<span class="badge badge-info">${Math.floor(ageInDays / 365)} ans</span>`,
-                        source: 'WHOAPI'
-                    });
-                }
-            } catch (e) {
-                console.warn('Domain age check error:', e);
-            }
+                    <div id="${mapId}" style="height: 300px; border-radius: 8px; margin-top: 10px;"></div>
+                    <script>
+                        setTimeout(() => {
+                            const map = L.map('${mapId}').setView([${lat}, ${lng}], 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                            }).addTo(map);
+                            
+                            L.marker([${lat}, ${lng}]).addTo(map)
+                                .bindPopup('${data.city || 'Localisation'}<br>${data.org || ''}');
+                        }, 500);
+    </script>
+    `,
+    badge: '<span class="badge badge-success">Carte interactive</span>',
+    source: 'Leaflet'
+    });
+    }
 
-            // Check SSL certificate
-            try {
-                const response = await fetch(`https://api.ssllabs.com/api/v3/analyze?host=${domain}`);
-                const data = await response.json();
+    // 4. Informations réseau
+    results.push({
+    title: '<i class="fas fa-network-wired"></i> Réseau',
+    content: `
+    <strong>FAI:</strong> ${data.org || 'Inconnu'}<br>
+    <strong>ASN:</strong> ${data.asn?.asn || 'Inconnu'}<br>
+    <strong>Domaine:</strong> ${data.hostname || 'Non disponible'}
+    `,
+    badge: '<span class="badge badge-secondary">Réseau</span>',
+    source: 'ipinfo.io'
+    });
 
-                if (data.status === 'READY') {
-                    const grade = data.endpoints[0]?.grade || 'Inconnu';
-                    results.push({
-                        title: '<i class="fas fa-lock"></i> Certificat SSL',
-                        content: `Note SSL: ${grade}`,
-                        badge: `<span class="badge ${grade === 'A' || grade === 'A+' ? 'badge-success' : 'badge-warning'}">${grade}</span>`,
-                        source: 'SSL Labs'
-                    });
-                }
-            } catch (e) {
-                console.warn('SSL check error:', e);
-            }
+    // 5. Détection de proxy/VPN
+    if (data.privacy?.proxy || data.privacy?.vpn) {
+    results.push({
+    title: '<i class="fas fa-user-secret"></i> Anonymisation',
+    content: `
+    <strong>Type:</strong> ${data.privacy?.vpn ? 'VPN' : 'Proxy'}<br>
+    <strong>Fournisseur:</strong> ${data.privacy?.service || 'Inconnu'}
+    `,
+    badge: '<span class="badge badge-warning">Anonymisé</span>',
+    source: 'ipinfo.io'
+    });
+    }
 
-            return results;
-        }
+    } catch (e) {
+    console.error('IP search error:', e);
+    results.push({
+    title: '<i class="fas fa-exclamation-triangle"></i> Erreur',
+    content: 'Impossible de récupérer les données. Essayez avec une IP publique.',
+    badge: '<span class="badge badge-danger">Erreur</span>',
+    source: 'ipinfo.io'
+    });
+    }
 
-        function isValidDomain(domain) {
-            // Simple domain validation
-            const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
-            return domainRegex.test(domain);
-        }
+    return results;
+    }
+    // Validation améliorée des IP
+    function isValidIP(ip) {
+    // IPv4
+    const ipv4Regex =
+    /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-        async function searchUsername(username) {
-            const results = [];
+    // IPv6 (simplifiée)
+    const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
 
-            // Check various social networks
-            const socialNetworks = [
-                { name: 'Twitter', url: `https://twitter.com/${username}`, icon: 'fab fa-twitter' },
-                { name: 'Instagram', url: `https://instagram.com/${username}`, icon: 'fab fa-instagram' },
-                { name: 'GitHub', url: `https://github.com/${username}`, icon: 'fab fa-github' },
-                { name: 'Reddit', url: `https://reddit.com/user/${username}`, icon: 'fab fa-reddit' },
-                { name: 'Facebook', url: `https://facebook.com/${username}`, icon: 'fab fa-facebook' },
-                { name: 'LinkedIn', url: `https://linkedin.com/in/${username}`, icon: 'fab fa-linkedin' },
-                { name: 'YouTube', url: `https://youtube.com/user/${username}`, icon: 'fab fa-youtube' },
-                { name: 'TikTok', url: `https://tiktok.com/@${username}`, icon: 'fab fa-tiktok' }
-            ];
+    return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+    }
 
-            // Check which profiles exist
-            const profileChecks = await Promise.all(socialNetworks.map(async network => {
-                try {
-                    const response = await fetch(network.url, { method: 'HEAD', mode: 'no-cors' });
-                    return { ...network, exists: true };
-                } catch (e) {
-                    return { ...network, exists: false };
-                }
-            }));
+    async function searchDomain(domain) {
+    const results = [];
 
-            const existingProfiles = profileChecks.filter(p => p.exists);
+    // Validate domain format first
+    if (!isValidDomain(domain)) {
+    results.push({
+    title: '<i class="fas fa-times-circle"></i> Domaine invalide',
+    content: 'Ce nom de domaine est invalide',
+    badge: '<span class="badge badge-danger">Invalide</span>',
+    source: 'Validation'
+    });
+    return results;
+    }
 
-            if (existingProfiles.length > 0) {
-                results.push({
-                    title: '<i class="fas fa-user-check"></i> Profils trouvés',
-                    content: existingProfiles.map(n =>
-                        `<a href="${n.url}" target="_blank" rel="noopener noreferrer"><i class="${n.icon}"></i> ${n.name}</a>`
-                    ).join(' | '),
-                    badge: `<span class="badge badge-success">${existingProfiles.length} profil(s)</span>`,
-                    source: 'Réseaux sociaux'
-                });
-            } else {
-                results.push({
-                    title: '<i class="fas fa-user-times"></i> Profils sociaux',
-                    content: 'Aucun profil trouvé sur les réseaux sociaux principaux',
-                    badge: '<span class="badge badge-warning">Aucun</span>',
-                    source: 'Réseaux sociaux'
-                });
-            }
+    // WHOIS information
+    results.push({
+    title: '<i class="fas fa-info-circle"></i> Informations WHOIS',
+    content: `Les informations WHOIS complètes sont disponibles sur <a href="https://www.whois.com/whois/${domain}"
+        target="_blank">whois.com</a>`,
+    badge: '<span class="badge badge-info">WHOIS</span>',
+    source: 'WHOIS.com'
+    });
 
-            // Check username on other services
-            results.push({
-                title: '<i class="fas fa-search-plus"></i> Autres vérifications',
-                content: `
-                    Vous pouvez vérifier ce nom d'utilisateur sur:<br><br>
-                    <a href="https://whatsmyname.app/?q=${username}" target="_blank">WhatsMyName</a> - Vérification sur 500+ sites<br>
-                    <a href="https://namechk.com/?q=${username}" target="_blank">Namechk</a> - Disponibilité du nom<br>
-                    <a href="https://checkusernames.com/${username}" target="_blank">CheckUsernames</a> - Vérification multi-sites
-                `,
-                badge: '<span class="badge badge-info">Outils</span>',
-                source: 'Services tiers'
-            });
+    // Check domain age
+    try {
+    const response = await fetch(`https://api.whoapi.com/?domain=${domain}&r=whois&apikey=YOUR_WHOAPI_KEY`);
+    const data = await response.json();
 
-            return results;
-        }
+    if (data.created) {
+    const createdDate = new Date(data.created);
+    const ageInDays = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
 
-        async function searchPerson(name) {
-            const results = [];
+    results.push({
+    title: '<i class="fas fa-calendar-alt"></i> Âge du domaine',
+    content: `
+    Créé le: ${createdDate.toLocaleDateString()}<br>
+    Âge: ~${ageInDays} jours (${Math.floor(ageInDays / 365)} ans)
+    `,
+    badge: `<span class="badge badge-info">${Math.floor(ageInDays / 365)} ans</span>`,
+    source: 'WHOAPI'
+    });
+    }
+    } catch (e) {
+    console.warn('Domain age check error:', e);
+    }
 
-            // Basic name validation
-            if (!name.includes(' ')) {
-                results.push({
-                    title: '<i class="fas fa-exclamation-triangle"></i> Format invalide',
-                    content: 'Pour une recherche de personne, veuillez entrer au moins un prénom et un nom',
-                    badge: '<span class="badge badge-warning">Incomplet</span>',
-                    source: 'Validation'
-                });
-                return results;
-            }
+    // Check SSL certificate
+    try {
+    const response = await fetch(`https://api.ssllabs.com/api/v3/analyze?host=${domain}`);
+    const data = await response.json();
 
-            // Search suggestions
-            results.push({
-                title: '<i class="fas fa-user-tag"></i> Recherche de personne',
-                content: `
-                    Pour rechercher une personne, essayez ces services:<br><br>
-                    <a href="https://www.google.com/search?q="${encodeURIComponent(name)}"" target="_blank">Google (recherche exacte)</a><br>
-                    <a href="https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(name)}" target="_blank">LinkedIn</a><br>
-                    <a href="https://www.facebook.com/search/people/?q=${encodeURIComponent(name)}" target="_blank">Facebook</a><br>
-                    <a href="https://pipl.com/search/?q=${encodeURIComponent(name)}" target="_blank">Pipl</a><br>
-                    <a href="https://thatsthem.com/name/${encodeURIComponent(name.replace(' ', '-'))}" target="_blank">That's Them</a>
-                `,
-                badge: '<span class="badge badge-info">Ressources</span>',
-                source: 'Services de recherche'
-            });
+    if (data.status === 'READY') {
+    const grade = data.endpoints[0]?.grade || 'Inconnu';
+    results.push({
+    title: '<i class="fas fa-lock"></i> Certificat SSL',
+    content: `Note SSL: ${grade}`,
+    badge: `<span class="badge ${grade === 'A' || grade === 'A+' ? 'badge-success' : 'badge-warning'}">${grade}</span>`,
+    source: 'SSL Labs'
+    });
+    }
+    } catch (e) {
+    console.warn('SSL check error:', e);
+    }
 
-            return results;
-        }
+    return results;
+    }
 
-        function displayResults(results) {
-            const container = document.getElementById('resultsContainer');
+    function isValidDomain(domain) {
+    // Simple domain validation
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+    return domainRegex.test(domain);
+    }
 
-            if (results.length === 0) {
-                container.innerHTML = `
-                    <div class="result-card">
-                        <div class="result-title"><i class="fas fa-info-circle"></i> Aucun résultat</div>
-                        <div class="result-content">Aucune information trouvée pour cette recherche. Essayez avec des termes différents.</div>
-                        <div class="result-source"><i class="fas fa-database"></i> OSINTool Pro</div>
-                    </div>
-                `;
-                return;
-            }
+    async function searchUsername(username) {
+    const results = [];
 
-            results.forEach(result => {
-                const card = document.createElement('div');
-                card.className = 'result-card';
+    // Check various social networks
+    const socialNetworks = [
+    { name: 'Twitter', url: `https://twitter.com/${username}`, icon: 'fab fa-twitter' },
+    { name: 'Instagram', url: `https://instagram.com/${username}`, icon: 'fab fa-instagram' },
+    { name: 'GitHub', url: `https://github.com/${username}`, icon: 'fab fa-github' },
+    { name: 'Reddit', url: `https://reddit.com/user/${username}`, icon: 'fab fa-reddit' },
+    { name: 'Facebook', url: `https://facebook.com/${username}`, icon: 'fab fa-facebook' },
+    { name: 'LinkedIn', url: `https://linkedin.com/in/${username}`, icon: 'fab fa-linkedin' },
+    { name: 'YouTube', url: `https://youtube.com/user/${username}`, icon: 'fab fa-youtube' },
+    { name: 'TikTok', url: `https://tiktok.com/@${username}`, icon: 'fab fa-tiktok' }
+    ];
 
-                card.innerHTML = `
-                    <div class="result-title">${result.title} ${result.badge || ''}</div>
-                    <div class="result-content">${result.content}</div>
-                    <div class="result-source"><i class="fas fa-database"></i> Source: ${result.source}</div>
-                `;
+    // Check which profiles exist
+    const profileChecks = await Promise.all(socialNetworks.map(async network => {
+    try {
+    const response = await fetch(network.url, { method: 'HEAD', mode: 'no-cors' });
+    return { ...network, exists: true };
+    } catch (e) {
+    return { ...network, exists: false };
+    }
+    }));
 
-                container.appendChild(card);
-            });
-        }
+    const existingProfiles = profileChecks.filter(p => p.exists);
+
+    if (existingProfiles.length > 0) {
+    results.push({
+    title: '<i class="fas fa-user-check"></i> Profils trouvés',
+    content: existingProfiles.map(n =>
+    `<a href="${n.url}" target="_blank" rel="noopener noreferrer"><i class="${n.icon}"></i> ${n.name}</a>`
+    ).join(' | '),
+    badge: `<span class="badge badge-success">${existingProfiles.length} profil(s)</span>`,
+    source: 'Réseaux sociaux'
+    });
+    } else {
+    results.push({
+    title: '<i class="fas fa-user-times"></i> Profils sociaux',
+    content: 'Aucun profil trouvé sur les réseaux sociaux principaux',
+    badge: '<span class="badge badge-warning">Aucun</span>',
+    source: 'Réseaux sociaux'
+    });
+    }
+
+    // Check username on other services
+    results.push({
+    title: '<i class="fas fa-search-plus"></i> Autres vérifications',
+    content: `
+    Vous pouvez vérifier ce nom d'utilisateur sur:<br><br>
+    <a href="https://whatsmyname.app/?q=${username}" target="_blank">WhatsMyName</a> - Vérification sur 500+ sites<br>
+    <a href="https://namechk.com/?q=${username}" target="_blank">Namechk</a> - Disponibilité du nom<br>
+    <a href="https://checkusernames.com/${username}" target="_blank">CheckUsernames</a> - Vérification multi-sites
+    `,
+    badge: '<span class="badge badge-info">Outils</span>',
+    source: 'Services tiers'
+    });
+
+    return results;
+    }
+
+    async function searchPerson(name) {
+    const results = [];
+
+    // Basic name validation
+    if (!name.includes(' ')) {
+    results.push({
+    title: '<i class="fas fa-exclamation-triangle"></i> Format invalide',
+    content: 'Pour une recherche de personne, veuillez entrer au moins un prénom et un nom',
+    badge: '<span class="badge badge-warning">Incomplet</span>',
+    source: 'Validation'
+    });
+    return results;
+    }
+
+    // Search suggestions
+    results.push({
+    title: '<i class="fas fa-user-tag"></i> Recherche de personne',
+    content: `
+    Pour rechercher une personne, essayez ces services:<br><br>
+    <a href="https://www.google.com/search?q=" ${encodeURIComponent(name)}"" target="_blank">Google (recherche
+        exacte)</a><br>
+    <a href="https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(name)}"
+        target="_blank">LinkedIn</a><br>
+    <a href="https://www.facebook.com/search/people/?q=${encodeURIComponent(name)}" target="_blank">Facebook</a><br>
+    <a href="https://pipl.com/search/?q=${encodeURIComponent(name)}" target="_blank">Pipl</a><br>
+    <a href="https://thatsthem.com/name/${encodeURIComponent(name.replace(' ', '-'))}" target="_blank">That's Them</a>
+    `,
+    badge: '<span class="badge badge-info">Ressources</span>',
+    source: 'Services de recherche'
+    });
+
+    return results;
+    }
+
+    function displayResults(results) {
+    const container = document.getElementById('resultsContainer');
+
+    if (results.length === 0) {
+    container.innerHTML = `
+    <div class="result-card">
+        <div class="result-title"><i class="fas fa-info-circle"></i> Aucun résultat</div>
+        <div class="result-content">Aucune information trouvée pour cette recherche. Essayez avec des termes différents.
+        </div>
+        <div class="result-source"><i class="fas fa-database"></i> OSINTool Pro</div>
+    </div>
+    `;
+    return;
+    }
+
+    results.forEach(result => {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+
+    card.innerHTML = `
+    <div class="result-title">${result.title} ${result.badge || ''}</div>
+    <div class="result-content">${result.content}</div>
+    <div class="result-source"><i class="fas fa-database"></i> Source: ${result.source}</div>
+    `;
+
+    container.appendChild(card);
+    });
+    }
     </script>
 </body>
 
