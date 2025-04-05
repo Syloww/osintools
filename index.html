@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OSINTool</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://votresite.com/">
@@ -24,12 +25,10 @@
     <!-- Sécurité -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https:;">
+        content="default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com;">
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Font Awesome pour les icônes -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="styles/index.css">
 </head>
 
@@ -39,7 +38,7 @@
             <h1><i class="fas fa-search"></i> OSINTool</h1>
             <p class="subtitle">Outil avancé de recherche en sources ouvertes</p>
             <button class="theme-toggle" id="themeToggle">
-                <i class="fas fa-moon"></i>
+                <i class="fas fa-moon" id="themeIcon"></i>
             </button>
         </header>
 
@@ -159,6 +158,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Gestion du thème
             const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
             const body = document.body;
 
             // Vérifier le localStorage pour le thème
@@ -167,10 +167,12 @@
             // Appliquer le thème sauvegardé
             if (currentTheme === 'dark') {
                 body.setAttribute('data-theme', 'dark');
-                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
             } else {
                 body.removeAttribute('data-theme');
-                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
             }
 
             // Basculer entre les thèmes
@@ -178,11 +180,13 @@
                 if (body.getAttribute('data-theme') === 'dark') {
                     body.removeAttribute('data-theme');
                     localStorage.setItem('theme', 'light');
-                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
                 } else {
                     body.setAttribute('data-theme', 'dark');
                     localStorage.setItem('theme', 'dark');
-                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
                 }
             });
 
@@ -217,9 +221,9 @@
                     const historyItem = document.createElement('div');
                     historyItem.className = 'history-item';
                     historyItem.innerHTML = `
-                <span>${item.type}: ${item.query}</span>
-                <span style="color: var(--text); opacity: 0.7;">${new Date(item.timestamp).toLocaleString()}</span>
-            `;
+                        <span>${item.type}: ${item.query}</span>
+                        <span style="color: var(--text); opacity: 0.7;">${new Date(item.timestamp).toLocaleString()}</span>
+                    `;
                     historyItem.addEventListener('click', () => {
                         document.getElementById('searchType').value = item.type;
                         document.getElementById('searchQuery').value = item.query;
@@ -274,10 +278,10 @@
 
                 // Mettre à jour le statut
                 document.getElementById('searchStatus').innerHTML = `
-            <span style="color: var(--accent);">
-                <i class="fas fa-spinner fa-pulse"></i> Recherche ${type} pour "${query}"
-            </span>
-        `;
+                    <span style="color: var(--accent);">
+                        <i class="fas fa-circle-notch fa-spin"></i> Recherche ${type} pour "${query}"
+                    </span>
+                `;
 
                 // Ici, votre script existant prendra le relais pour effectuer la recherche réelle
                 // Cette fonction ne fait que préparer l'interface utilisateur
@@ -293,18 +297,18 @@
 
                 if (!results || results.length === 0) {
                     container.innerHTML = `
-                <div class="error">
-                    <i class="fas fa-info-circle"></i>
-                    <div>Aucun résultat trouvé pour cette recherche</div>
-                </div>
-            `;
+                        <div class="error">
+                            <i class="fas fa-info-circle"></i>
+                            <div>Aucun résultat trouvé pour cette recherche</div>
+                        </div>
+                    `;
 
                     // Mettre à jour le statut
                     document.getElementById('searchStatus').innerHTML = `
-                <span style="color: var(--danger);">
-                    <i class="fas fa-times-circle"></i> Aucun résultat trouvé
-                </span>
-            `;
+                        <span style="color: var(--danger);">
+                            <i class="fas fa-times-circle"></i> Aucun résultat trouvé
+                        </span>
+                    `;
                     return;
                 }
 
@@ -312,27 +316,27 @@
                     const card = document.createElement('div');
                     card.className = 'result-card';
                     card.innerHTML = `
-                <div class="result-title">
-                    ${result.title}
-                    ${result.badges ? result.badges.join('') : ''}
-                </div>
-                <div class="result-content">${result.content}</div>
-                <div class="result-source">
-                    <i class="fas fa-database"></i> Source: ${result.source}
-                    <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.7;">
-                        ${new Date(result.timestamp || new Date()).toLocaleTimeString()}
-                    </span>
-                </div>
-            `;
+                        <div class="result-title">
+                            ${result.title}
+                            ${result.badges ? result.badges.join('') : ''}
+                        </div>
+                        <div class="result-content">${result.content}</div>
+                        <div class="result-source">
+                            <i class="fas fa-database"></i> Source: ${result.source}
+                            <span style="margin-left: auto; font-size: 0.8rem; opacity: 0.7;">
+                                ${new Date(result.timestamp || new Date()).toLocaleTimeString()}
+                            </span>
+                        </div>
+                    `;
                     container.appendChild(card);
                 });
 
                 // Mettre à jour le statut
                 document.getElementById('searchStatus').innerHTML = `
-            <span style="color: var(--success);">
-                <i class="fas fa-check-circle"></i> ${results.length} résultat(s) trouvé(s)
-            </span>
-        `;
+                    <span style="color: var(--success);">
+                        <i class="fas fa-check-circle"></i> ${results.length} résultat(s) trouvé(s)
+                    </span>
+                `;
             };
 
             // Fonction pour afficher les erreurs (à appeler depuis votre script existant)
@@ -343,10 +347,10 @@
 
                 // Mettre à jour le statut
                 document.getElementById('searchStatus').innerHTML = `
-            <span style="color: var(--danger);">
-                <i class="fas fa-times-circle"></i> Erreur lors de la recherche
-            </span>
-        `;
+                    <span style="color: var(--danger);">
+                        <i class="fas fa-times-circle"></i> Erreur lors de la recherche
+                    </span>
+                `;
             };
         });
     </script>
