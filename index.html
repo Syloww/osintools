@@ -20,6 +20,9 @@
         <header>
             <h1><i class="fas fa-search"></i> OSINTool</h1>
             <p class="subtitle">Outil avancé de recherche en sources ouvertes</p>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
         </header>
 
         <section class="search-section">
@@ -126,6 +129,39 @@
         </footer>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Gestion du thème
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+
+            // Vérifier le localStorage pour le thème
+            const currentTheme = localStorage.getItem('theme') || 'light';
+
+            // Appliquer le thème sauvegardé
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+
+            // Basculer entre les thèmes
+            themeToggle.addEventListener('click', function () {
+                if (body.getAttribute('data-theme') === 'dark') {
+                    body.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                } else {
+                    body.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                }
+            });
+
+        });
+    </script>
     <script src="js/osint.js"></script>
 </body>
 

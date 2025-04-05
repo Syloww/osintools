@@ -8,6 +8,64 @@
     --warning: #ffc107;
     --danger: #dc3545;
     --info: #17a2b8;
+    --text: #333;
+    --background: #f8f9fa;
+    --card-bg: #fff;
+    --border: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+    --primary: #4fc3f7;
+    --secondary: #3a5a78;
+    --dark: #f8f9fa;
+    --light: #1a1a2e;
+    --accent: #4fc3f7;
+    --text: #f0f0f0;
+    --background: #1a1a2e;
+    --card-bg: #2c3e50;
+    --border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.search-section,
+.results-section,
+.result-card,
+.device-info-item {
+    background: var(--card-bg);
+    transition: background-color 0.3s ease;
+}
+
+header, footer, .results-header {
+    border-color: var(--border);
+}
+
+input,
+select {
+    background-color: var(--card-bg);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+/* Ajoutez ce bouton dans votre header */
+.theme-toggle {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--primary);
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
 }
 
 * {
@@ -15,12 +73,6 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-    background-color: var(--light);
-    color: var(--dark);
-    line-height: 1.6;
 }
 
 .container {
@@ -80,14 +132,6 @@ label i {
     color: var(--primary);
 }
 
-input,
-select {
-    padding: 0.8rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-    transition: border 0.3s ease;
-}
 
 input:focus,
 select:focus {
