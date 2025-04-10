@@ -3,12 +3,14 @@ const fetch = require("node-fetch");
 
 export default async function handler(req, res) {
   const { prompt } = req.body;
-  console.log("Prompt reçu :", prompt); // Log du prompt
-
   const apiKey = process.env.OPENAI_API_KEY;
-  console.log("Clé API :", apiKey); // Log de la clé API (à ne pas laisser en prod, juste pour debug)
 
   try {
+    // Vérifie si la clé API est bien définie
+    if (!apiKey) {
+      return res.status(500).json({ error: "Clé API manquante" });
+    }
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -21,14 +23,16 @@ export default async function handler(req, res) {
       })
     });
 
+    // Vérifie si la réponse est OK
     if (!response.ok) {
-      throw new Error("Erreur avec l'API OpenAI");
+      const errorMessage = await response.text(); // Récupérer le texte d'erreur
+      return res.status(500).json({ error: errorMessage });
     }
 
     const data = await response.json();
-    res.status(200).json({ message: data.choices[0].message.content });
+    return res.status(200).json({ message: data.choices[0].message.content });
   } catch (error) {
-    console.error("Erreur dans la fonction API :", error);
-    res.status(500).json({ error: error.message });
+    console.error("Erreur serveur :", error);
+    return res.status(500).json({ error: "Erreur interne du serveur." });
   }
 }

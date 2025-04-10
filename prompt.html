@@ -14,14 +14,24 @@
     async function askAI() {
       const prompt = document.getElementById("prompt").value;
 
-      const response = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
-      });
+      try {
+        const response = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
 
-      const data = await response.json();
-      document.getElementById("result").innerText = data.message;
+        if (!response.ok) {
+          const errorData = await response.json();
+          document.getElementById("result").innerText = "Erreur serveur : " + errorData.error;
+          return;
+        }
+
+        const data = await response.json();
+        document.getElementById("result").innerText = data.message;
+      } catch (error) {
+        document.getElementById("result").innerText = "Erreur de communication : " + error.message;
+      }
     }
   </script>
 </body>
