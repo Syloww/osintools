@@ -1,49 +1,36 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Chat IA 🔥</title>
+  <meta charset="UTF-8">
+  <title>Chat IA avec Hugging Face</title>
 </head>
-
 <body>
-    <h1>Pose ta question à ChatGPT</h1>
-    <input type="text" id="prompt" placeholder="Écris ta question...">
-    <button onclick="askAI()">Envoyer</button>
-    <pre id="result"></pre>
+  <h1>Pose ta question à l'IA</h1>
+  <input type="text" id="prompt" placeholder="Écris ta question...">
+  <button onclick="askAI()">Envoyer</button>
+  <pre id="result"></pre>
 
-    <script>
-        async function askAI() {
-            const prompt = document.getElementById("prompt").value;
-            if (!prompt) return;
+  <script>
+    async function askAI() {
+      const prompt = document.getElementById("prompt").value;
+      document.getElementById("result").innerText = "Chargement...";
 
-            document.getElementById("result").innerText = "Chargement...";
+      try {
+        const response = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
 
-            try {
-                const response = await fetch("/api/ask", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ prompt })
-                });
-
-                const result = await response.text(); // D'abord récupérer en texte
-
-                try {
-                    // Essayer de parser en JSON
-                    const data = JSON.parse(result);
-                    if (!response.ok) {
-                        throw new Error(data.error || "Erreur serveur");
-                    }
-                    document.getElementById("result").innerText = data.message;
-                } catch (e) {
-                    // Si le parsing JSON échoue, afficher le texte brut
-                    document.getElementById("result").innerText = "Réponse inattendue : " + result;
-                }
-            } catch (error) {
-                document.getElementById("result").innerText = "Erreur : " + error.message;
-            }
+        const result = await response.json();
+        if (result.error) {
+          throw new Error(result.error);
         }
-    </script>
+        document.getElementById("result").innerText = result.message;
+      } catch (error) {
+        document.getElementById("result").innerText = "Erreur : " + error.message;
+      }
+    }
+  </script>
 </body>
-
 </html>
