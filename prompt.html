@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>Chat IA 🔥</title>
 </head>
-
 <body>
+  <h1>Pose ta question à ChatGPT</h1>
+  <input type="text" id="prompt" placeholder="Écris ta question...">
+  <button onclick="askAI()">Envoyer</button>
+  <pre id="result"></pre>
 
+  <script>
+    async function askAI() {
+      const prompt = document.getElementById("prompt").value;
 
-    <script>
-        import OpenAI from "openai";
-        const client = new OpenAI();
+      const response = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
 
-        const response = await client.responses.create({
-            model: "gpt-4o",
-            input: "Write a one-sentence bedtime story about a unicorn."
-        });
-
-        console.log(response.output_text);
-    </script>
+      const data = await response.json();
+      document.getElementById("result").innerText = data.message;
+    }
+  </script>
 </body>
-
 </html>
