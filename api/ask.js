@@ -20,16 +20,23 @@ export default async function handler(req, res) {
             })
         });
 
+        // Modifiez la partie de gestion d'erreur
         if (!response.ok) {
-            // Essayez d'abord de parser en JSON, sinon récupérez le texte
             let errorMessage;
             try {
                 const errorData = await response.json();
-                errorMessage = errorData.error?.message || JSON.stringify(errorData);
+                if (errorData.error?.code === 'insufficient_quota') {
+                    errorMessage = "Quota API épuisé. Veuillez vérifier votre compte OpenAI.";
+                } else {
+                    errorMessage = errorData.error?.message || JSON.stringify(errorData);
+                }
             } catch {
                 errorMessage = await response.text();
             }
-            return res.status(500).json({ error: errorMessage });
+            return res.status(500).json({
+                error: errorMessage,
+                help: "Voir https://platform.openai.com/docs/guides/error-codes/api-errors"
+            });
         }
 
         const data = await response.json();
