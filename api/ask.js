@@ -1,48 +1,38 @@
-// api/ask.js
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
 export default async function handler(req, res) {
-    const { prompt } = req.body;
-    const apiKey = process.env.OPENAI_API_KEY;
+  const { prompt } = req.body;
 
-    try {
-        if (!apiKey) {
-            return res.status(500).json({ error: "Clé API manquante" });
-        }
-
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-                model: "gpt-3.5-turbo",
-                messages: [{ role: "user", content: prompt }]
-            })
-        });
-
-        // Modifiez la partie de gestion d'erreur
-        if (!response.ok) {
-            let errorMessage;
-            try {
-                const errorData = await response.json();
-                if (errorData.error?.code === 'insufficient_quota') {
-                    errorMessage = "Quota API épuisé. Veuillez vérifier votre compte OpenAI.";
-                } else {
-                    errorMessage = errorData.error?.message || JSON.stringify(errorData);
-                }
-            } catch {
-                errorMessage = await response.text();
-            }
-            return res.status(500).json({
-                error: errorMessage,
-                help: "Voir https://platform.openai.com/docs/guides/error-codes/api-errors"
-            });
-        }
-
-        const data = await response.json();
-        return res.status(200).json({ message: data.choices[0].message.content });
-    } catch (error) {
-        console.error("Erreur serveur :", error);
-        return res.status(500).json({ error: "Erreur interne du serveur." });
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: "Clé API manquante" });
     }
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", // ou "gpt-4", "gpt-4-turbo", "gpt-4o" si vous y avez accès
+      messages: [{ role: "user", content: prompt }]
+    });
+
+    return res.status(200).json({ 
+      message: response.choices[0]?.message?.content 
+    });
+
+  } catch (error) {
+    console.error("Erreur OpenAI:", error);
+    
+    let errorMessage = error.message;
+    if (error.response) {
+      errorMessage = error.response.data?.error?.message || errorMessage;
+    }
+
+    return res.status(500).json({ 
+      error: errorMessage,
+      code: error.code,
+      type: error.type
+    });
+  }
 }
