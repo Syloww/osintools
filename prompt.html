@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Chat IA 🔥</title>
+    <meta charset="UTF-8">
+    <title>Chat IA 🔥</title>
 </head>
+
 <body>
-  <h1>Pose ta question à ChatGPT</h1>
-  <input type="text" id="prompt" placeholder="Écris ta question...">
-  <button onclick="askAI()">Envoyer</button>
-  <pre id="result"></pre>
+    <h1>Pose ta question à ChatGPT</h1>
+    <input type="text" id="prompt" placeholder="Écris ta question...">
+    <button onclick="askAI()">Envoyer</button>
+    <pre id="result"></pre>
 
-  <script>
-    async function askAI() {
-      const prompt = document.getElementById("prompt").value;
+    <script>
+        async function askAI() {
+            const prompt = document.getElementById("prompt").value;
+            if (!prompt) return;
 
-      try {
-        const response = await fetch("/api/ask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt })
-        });
+            document.getElementById("result").innerText = "Chargement...";
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          document.getElementById("result").innerText = "Erreur serveur : " + errorData.error;
-          return;
+            try {
+                const response = await fetch("/api/ask", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const result = await response.text(); // D'abord récupérer en texte
+
+                try {
+                    // Essayer de parser en JSON
+                    const data = JSON.parse(result);
+                    if (!response.ok) {
+                        throw new Error(data.error || "Erreur serveur");
+                    }
+                    document.getElementById("result").innerText = data.message;
+                } catch (e) {
+                    // Si le parsing JSON échoue, afficher le texte brut
+                    document.getElementById("result").innerText = "Réponse inattendue : " + result;
+                }
+            } catch (error) {
+                document.getElementById("result").innerText = "Erreur : " + error.message;
+            }
         }
-
-        const data = await response.json();
-        document.getElementById("result").innerText = data.message;
-      } catch (error) {
-        document.getElementById("result").innerText = "Erreur de communication : " + error.message;
-      }
-    }
-  </script>
+    </script>
 </body>
+
 </html>
