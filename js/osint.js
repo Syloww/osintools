@@ -215,71 +215,105 @@ function validateEmailSyntax(email) {
 async function searchPhoneNumber(phoneNumber) {
     const results = [];
 
-    // Normalisation du numéro (supprime tous les caractères non numériques)
+    // Normalisation du numéro (supprime tous les caractères non numériques sauf +)
     const normalizedPhone = phoneNumber.replace(/[^\d+]/g, '');
 
     // Validation de base
     if (!normalizedPhone.match(/^\+?[\d\s]{8,}$/)) {
         results.push({
             title: '<i class="fas fa-times-circle"></i> Format invalide',
-            content: 'Le numéro doit contenir au moins 8 chiffres. Format international recommandé: +33123456789',
+            content: 'Le numéro doit contenir au moins 8 chiffres. Format international requis: +33123456789',
             badge: '<span class="badge badge-danger">Invalide</span>',
             source: 'Validation'
         });
         return results;
     }
 
-    // Utilisation d'une API gratuite
+    // Utilisation de l'API irbis.espysys.com
     try {
-        const response = await fetch(`https://phonevalidation.abstractapi.com/v1/?api_key=YOUR_API_KEY&phone=${normalizedPhone}`);
-        const data = await response.json();
-
-        if (!data.valid) {
-            results.push({
-                title: '<i class="fas fa-times-circle"></i> Numéro invalide',
-                content: data.error?.message || 'Ce numéro n\'est pas valide',
-                badge: '<span class="badge badge-danger">Invalide</span>',
-                source: 'AbstractAPI'
-            });
-            return results;
-        }
-
-        results.push({
-            title: '<i class="fas fa-check-circle"></i> Numéro valide',
-            content: 'Ce numéro de téléphone est valide',
-            badge: '<span class="badge badge-success">Valide</span>',
-            source: 'AbstractAPI'
+        const response = await fetch('https://irbis.espysys.com/api/developer/combined_phone', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                key: 'YOUR_API_KEY', // Remplacez par votre clé API réelle
+                value: normalizedPhone,
+                lookupId: 'default' // Vous pouvez ajuster ceci si nécessaire
+            })
         });
 
-        // Format international standardisé
-        const intlFormat = data.format?.international || normalizedPhone;
+        const data = await response.json();
+
+        // Vérification si la réponse contient des erreurs
+        if (data.error || !data.success) {
+            throw new Error(data.message || 'Erreur inconnue de l\'API');
+        }
+
+        // Affichage des informations de base
         results.push({
-            title: '<i class="fas fa-phone-alt"></i> Format international',
-            content: intlFormat,
-            badge: '<span class="badge badge-info">Standard</span>',
-            source: 'AbstractAPI'
+            title: '<i class="fas fa-check-circle"></i> Numéro valide',
+            content: 'Ce numéro de téléphone a été validé',
+            badge: '<span class="badge badge-success">Valide</span>',
+            source: 'Irbis API'
         });
 
         // Informations de localisation
-        results.push({
-            title: '<i class="fas fa-globe-europe"></i> Localisation',
-            content: `
-        <strong>Pays:</strong> ${data.country?.name || 'Inconnu'}<br>
-        <strong>Code:</strong> +${data.country?.prefix || '?'}<br>
-        <strong>Opérateur:</strong> ${data.carrier || 'Inconnu'}<br>
-        <strong>Type:</strong> ${data.type || 'Inconnu'}
-    `,
-            badge: `<span class="badge badge-info">${data.country?.name || 'Localisation'}</span>`,
-            source: 'AbstractAPI'
-        });
+        if (data.country || data.region) {
+            results.push({
+                title: '<i class="fas fa-globe-europe"></i> Localisation',
+                content: `
+                    <strong>Pays:</strong> ${data.country || 'Inconnu'}<br>
+                    <strong>Région/Ville:</strong> ${data.region || 'Inconnue'}<br>
+                    <strong>Opérateur:</strong> ${data.carrier || 'Inconnu'}<br>
+                    <strong>Type:</strong> ${data.line_type || 'Inconnu'}
+                `,
+                badge: `<span class="badge badge-info">${data.country || 'Localisation'}</span>`,
+                source: 'Irbis API'
+            });
+        }
+
+        // Informations supplémentaires si disponibles
+        if (data.additional_info) {
+            results.push({
+                title: '<i class="fas fa-info-circle"></i> Informations supplémentaires',
+                content: data.additional_info,
+                badge: '<span class="badge badge-secondary">Détails</span>',
+                source: 'Irbis API'
+            });
+        }
+
+        // Vérification des risques si disponibles
+        if (data.risk_score) {
+            let riskLevel = '';
+            let riskBadgeClass = '';
+            
+            if (data.risk_score > 7) {
+                riskLevel = 'Élevé';
+                riskBadgeClass = 'badge-danger';
+            } else if (data.risk_score > 4) {
+                riskLevel = 'Moyen';
+                riskBadgeClass = 'badge-warning';
+            } else {
+                riskLevel = 'Faible';
+                riskBadgeClass = 'badge-success';
+            }
+            
+            results.push({
+                title: '<i class="fas fa-shield-alt"></i> Évaluation du risque',
+                content: `Score de risque: ${data.risk_score}/10 (${riskLevel})`,
+                badge: `<span class="badge ${riskBadgeClass}">${riskLevel}</span>`,
+                source: 'Irbis API'
+            });
+        }
 
     } catch (e) {
         console.error('Phone validation error:', e);
         results.push({
             title: '<i class="fas fa-exclamation-triangle"></i> Erreur',
-            content: 'Service temporairement indisponible. Essayez avec un format international: +33123456789',
-            badge: '<span class="badge badge-warning">Erreur</span>',
-            source: 'AbstractAPI'
+            content: `Erreur lors de la recherche: ${e.message}`,
+            badge: '<span class="badge badge-danger">Erreur</span>',
+            source: 'Irbis API'
         });
     }
 
