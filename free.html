@@ -378,7 +378,7 @@
                     throw new Error("Erreur lors de l'envoi de l'introduction");
                 }
                 
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await new Promise(resolve => setTimeout(resolve, 100));
                 
                 for (let i = 0; i < codeCount && isGenerating; i++) {
                     const code = generateNitroCode();
@@ -422,7 +422,7 @@
                     
                     // Wait before next code
                     if (i < codeCount - 1 && isGenerating) {
-                        await new Promise(resolve => setTimeout(resolve, 10));
+                        await new Promise(resolve => setTimeout(resolve, 100));
                     }
                 }
                 
