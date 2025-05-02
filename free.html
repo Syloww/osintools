@@ -3,10 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Générateur de codes Nitro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #5865F2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #4752C4;
+        }
+        #output {
+            text-align: left;
+            margin-top: 20px;
+        }
+        #webhookUrl {
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
+    <h1>Générateur de codes Nitro Discord</h1>
+    <p>Entrez l'URL de votre webhook Discord pour envoyer les codes générés :</p>
+    
+    <input type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." required>
+    <button id="generateBtn">Générer et envoyer les codes</button>
+    
+    <div id="output"></div>
 
-    <script src="js/free.js"></script>
+    <script>
+        function generateNitroCode(length = 16) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < length; i++) {
+                code += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return code;
+        }
+
+        async function sendToDiscordWebhook(webhookUrl, message) {
+            const payload = {
+                content: message
+            };
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+                
+                if (!response.ok) {
+                    console.error('Erreur HTTP:', response.status);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Erreur réseau:', error);
+                return false;
+            }
+            
+            return true;
+        }
+
+        async function generateAndSendNitroCodes(webhookUrl) {
+            let localOutput = "";
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = "Génération en cours...";
+            
+            // Envoyer le message d'introduction
+            const introSuccess = await sendToDiscordWebhook(webhookUrl, "**Nouveaux codes Nitro générés**\n\n");
+            if (!introSuccess) {
+                outputDiv.innerHTML = "Erreur lors de l'envoi de l'introduction";
+                alert("Erreur lors de l'envoi à Discord. Voir la console pour les détails.");
+                return;
+            }
+            
+            // Attendre 1 seconde après l'intro
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            for (let i = 0; i < 40; i++) {
+                const code = generateNitroCode();
+                const nitroLink = `https://discord.gift/${code}`;
+                const message = `${nitroLink}`;
+                localOutput += `<a href="${nitroLink}" target="_blank">Code ${i + 1}: ${code}</a><br>`;
+                
+                console.log(`Code ${i + 1}: ${nitroLink}`);
+                
+                // Envoyer chaque code individuellement
+                const success = await sendToDiscordWebhook(webhookUrl, message);
+                if (!success) {
+                    outputDiv.innerHTML = "Erreur lors de l'envoi d'un code";
+                    alert("Erreur lors de l'envoi à Discord. Voir la console pour les détails.");
+                    return;
+                }
+                
+                // Mettre à jour l'affichage en temps réel
+                outputDiv.innerHTML = localOutput;
+                
+                // Attendre 1 seconde entre chaque code
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+
+        // Gestionnaire d'événement pour le bouton
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            const webhookUrl = document.getElementById('webhookUrl').value.trim();
+            
+            if (!webhookUrl) {
+                alert("Veuillez entrer une URL de webhook valide");
+                return;
+            }
+            
+            generateAndSendNitroCodes(webhookUrl);
+        });
+    </script>
 </body>
 </html>
