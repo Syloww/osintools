@@ -70,9 +70,6 @@ async function generateAndSendNitroCodes() {
     }
     
     document.body.innerHTML = localOutput;
-    
-    console.log("Tous les codes ont été envoyés avec succès !");
-    alert("Codes envoyés sur Discord ! Vérifiez votre salon webhook");
 }
 
 // Lancement
