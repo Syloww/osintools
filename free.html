@@ -5,48 +5,305 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Générateur de codes Nitro</title>
     <style>
+        :root {
+            --primary: #5865F2;
+            --primary-hover: #4752C4;
+            --danger: #ED4245;
+            --danger-hover: #D03538;
+            --background: #36393F;
+            --card: #2F3136;
+            --text: #FFFFFF;
+            --text-muted: #B9BBBE;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            text-align: center;
+            line-height: 1.5;
         }
-        input, button {
-            padding: 10px;
-            margin: 10px 0;
+        
+        h1 {
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background-color: var(--card);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        
+        input {
             width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #202225;
+            background-color: #202225;
+            color: var(--text);
+            font-size: 16px;
             box-sizing: border-box;
         }
-        button {
-            background-color: #5865F2;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
         }
-        button:hover {
-            background-color: #4752C4;
-        }
-        #output {
-            text-align: left;
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
             margin-top: 20px;
         }
-        #webhookUrl {
-            width: 100%;
+        
+        button {
+            padding: 12px 20px;
+            border-radius: 4px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+            transition: background-color 0.2s;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+        
+        .btn-secondary {
+            background-color: #4F545C;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5D6269;
+        }
+        
+        #output {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #202225;
+            border-radius: 4px;
+        }
+        
+        .code-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #2F3136;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .code-item:last-child {
+            border-bottom: none;
+        }
+        
+        .code-link {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .code-link:hover {
+            text-decoration: underline;
+        }
+        
+        .history-container {
+            margin-top: 30px;
+        }
+        
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .history-item {
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            background-color: #202225;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .timestamp {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background-color: #3BA55C;
+        }
+        
+        .status-error {
+            background-color: var(--danger);
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            height: 6px;
+            background-color: #202225;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #202225;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
 <body>
     <h1>Générateur de codes Nitro Discord</h1>
-    <p>Entrez l'URL de votre webhook Discord pour envoyer les codes générés :</p>
     
-    <input type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." required>
-    <button id="generateBtn">Générer et envoyer les codes</button>
+    <div class="tab-container">
+        <div class="tab active" data-tab="generator">Générateur</div>
+        <div class="tab" data-tab="history">Historique</div>
+    </div>
     
-    <div id="output"></div>
+    <div id="generator" class="tab-content active">
+        <div class="card">
+            <div class="input-group">
+                <label for="webhookUrl">URL du Webhook Discord</label>
+                <input type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." required>
+            </div>
+            
+            <div class="input-group">
+                <label for="codeCount">Nombre de codes à générer</label>
+                <input type="number" id="codeCount" value="40" min="1" max="100">
+            </div>
+            
+            <div class="button-group">
+                <button id="generateBtn" class="btn-primary">Générer</button>
+                <button id="stopBtn" class="btn-danger" disabled>Arrêter</button>
+            </div>
+            
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            
+            <div id="status"></div>
+            
+            <h3>Codes générés:</h3>
+            <div id="output"></div>
+        </div>
+    </div>
+    
+    <div id="history" class="tab-content">
+        <div class="card">
+            <h3>Historique des générations</h3>
+            <div id="historyList" class="history-list"></div>
+            <button id="clearHistoryBtn" class="btn-secondary">Effacer l'historique</button>
+        </div>
+    </div>
 
     <script>
+        // Variables globales
+        let isGenerating = false;
+        let generationHistory = JSON.parse(localStorage.getItem('nitroGenerationHistory')) || [];
+        let currentGeneration = null;
+        
+        // DOM Elements
+        const webhookUrlInput = document.getElementById('webhookUrl');
+        const codeCountInput = document.getElementById('codeCount');
+        const generateBtn = document.getElementById('generateBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const outputDiv = document.getElementById('output');
+        const statusDiv = document.getElementById('status');
+        const progressBar = document.getElementById('progressBar');
+        const historyList = document.getElementById('historyList');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Initialize
+        renderHistory();
+        
+        // Event Listeners
+        generateBtn.addEventListener('click', startGeneration);
+        stopBtn.addEventListener('click', stopGeneration);
+        clearHistoryBtn.addEventListener('click', clearHistory);
+        
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // Functions
         function generateNitroCode(length = 16) {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
@@ -55,12 +312,12 @@
             }
             return code;
         }
-
+        
         async function sendToDiscordWebhook(webhookUrl, message) {
             const payload = {
                 content: message
             };
-
+            
             try {
                 const response = await fetch(webhookUrl, {
                     method: 'POST',
@@ -74,65 +331,229 @@
                     console.error('Erreur HTTP:', response.status);
                     return false;
                 }
+                return true;
             } catch (error) {
                 console.error('Erreur réseau:', error);
                 return false;
             }
-            
-            return true;
         }
-
-        async function generateAndSendNitroCodes(webhookUrl) {
-            let localOutput = "";
-            const outputDiv = document.getElementById('output');
-            outputDiv.innerHTML = "Génération en cours...";
+        
+        async function startGeneration() {
+            if (isGenerating) return;
             
-            // Envoyer le message d'introduction
-            const introSuccess = await sendToDiscordWebhook(webhookUrl, "**Nouveaux codes Nitro générés**\n\n");
-            if (!introSuccess) {
-                outputDiv.innerHTML = "Erreur lors de l'envoi de l'introduction";
-                alert("Erreur lors de l'envoi à Discord. Voir la console pour les détails.");
-                return;
-            }
-            
-            // Attendre 1 seconde après l'intro
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            for (let i = 0; i < 40; i++) {
-                const code = generateNitroCode();
-                const nitroLink = `https://discord.gift/${code}`;
-                const message = `${nitroLink}`;
-                localOutput += `<a href="${nitroLink}" target="_blank">Code ${i + 1}: ${code}</a><br>`;
-                
-                console.log(`Code ${i + 1}: ${nitroLink}`);
-                
-                // Envoyer chaque code individuellement
-                const success = await sendToDiscordWebhook(webhookUrl, message);
-                if (!success) {
-                    outputDiv.innerHTML = "Erreur lors de l'envoi d'un code";
-                    alert("Erreur lors de l'envoi à Discord. Voir la console pour les détails.");
-                    return;
-                }
-                
-                // Mettre à jour l'affichage en temps réel
-                outputDiv.innerHTML = localOutput;
-                
-                // Attendre 1 seconde entre chaque code
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-        }
-
-        // Gestionnaire d'événement pour le bouton
-        document.getElementById('generateBtn').addEventListener('click', () => {
-            const webhookUrl = document.getElementById('webhookUrl').value.trim();
+            const webhookUrl = webhookUrlInput.value.trim();
+            const codeCount = parseInt(codeCountInput.value);
             
             if (!webhookUrl) {
-                alert("Veuillez entrer une URL de webhook valide");
+                updateStatus("Veuillez entrer une URL de webhook valide", "error");
                 return;
             }
             
-            generateAndSendNitroCodes(webhookUrl);
-        });
+            if (isNaN(codeCount) {
+                updateStatus("Veuillez entrer un nombre valide de codes", "error");
+                return;
+            }
+            
+            isGenerating = true;
+            currentGeneration = {
+                startTime: new Date(),
+                webhookUrl: webhookUrl,
+                codeCount: codeCount,
+                generatedCodes: [],
+                successCount: 0,
+                errorCount: 0
+            };
+            
+            generateBtn.disabled = true;
+            stopBtn.disabled = false;
+            outputDiv.innerHTML = "";
+            progressBar.style.width = "0%";
+            
+            updateStatus("Génération en cours...", "info");
+            
+            try {
+                // Send introduction message
+                const introSuccess = await sendToDiscordWebhook(webhookUrl, "**Nouveaux codes Nitro générés**\n\n");
+                if (!introSuccess) {
+                    throw new Error("Erreur lors de l'envoi de l'introduction");
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                for (let i = 0; i < codeCount && isGenerating; i++) {
+                    const code = generateNitroCode();
+                    const nitroLink = `https://discord.gift/${code}`;
+                    
+                    // Add to current generation
+                    currentGeneration.generatedCodes.push({
+                        code: code,
+                        link: nitroLink,
+                        timestamp: new Date()
+                    });
+                    
+                    // Display in UI
+                    const codeElement = document.createElement('div');
+                    codeElement.className = 'code-item';
+                    codeElement.innerHTML = `
+                        <a href="${nitroLink}" class="code-link" target="_blank">Code ${i + 1}: ${code}</a>
+                        <span class="status status-success">Envoyé</span>
+                    `;
+                    outputDiv.appendChild(codeElement);
+                    
+                    // Scroll to bottom
+                    outputDiv.scrollTop = outputDiv.scrollHeight;
+                    
+                    // Send to Discord
+                    const success = await sendToDiscordWebhook(webhookUrl, nitroLink);
+                    
+                    if (success) {
+                        currentGeneration.successCount++;
+                    } else {
+                        currentGeneration.errorCount++;
+                        codeElement.querySelector('.status').className = 'status status-error';
+                        codeElement.querySelector('.status').textContent = 'Erreur';
+                    }
+                    
+                    // Update progress
+                    const progress = ((i + 1) / codeCount) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    updateStatus(`Génération en cours: ${i + 1}/${codeCount} codes envoyés`, "info");
+                    
+                    // Wait before next code
+                    if (i < codeCount - 1 && isGenerating) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+                
+                if (isGenerating) {
+                    // Generation completed
+                    currentGeneration.endTime = new Date();
+                    generationHistory.unshift(currentGeneration);
+                    saveHistory();
+                    renderHistory();
+                    
+                    updateStatus(`Génération terminée: ${currentGeneration.successCount} codes envoyés avec succès, ${currentGeneration.errorCount} erreurs`, "success");
+                } else {
+                    // Generation stopped
+                    updateStatus("Génération arrêtée par l'utilisateur", "warning");
+                }
+            } catch (error) {
+                console.error(error);
+                updateStatus(`Erreur: ${error.message}`, "error");
+            } finally {
+                isGenerating = false;
+                generateBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+        
+        function stopGeneration() {
+            if (isGenerating) {
+                isGenerating = false;
+                updateStatus("Arrêt en cours...", "warning");
+                stopBtn.disabled = true;
+                
+                if (currentGeneration) {
+                    currentGeneration.endTime = new Date();
+                    generationHistory.unshift(currentGeneration);
+                    saveHistory();
+                    renderHistory();
+                }
+            }
+        }
+        
+        function updateStatus(message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = '';
+            
+            switch (type) {
+                case "error":
+                    statusDiv.style.color = "#ED4245";
+                    break;
+                case "success":
+                    statusDiv.style.color = "#3BA55C";
+                    break;
+                case "warning":
+                    statusDiv.style.color = "#FAA61A";
+                    break;
+                default:
+                    statusDiv.style.color = "#B9BBBE";
+            }
+        }
+        
+        function saveHistory() {
+            localStorage.setItem('nitroGenerationHistory', JSON.stringify(generationHistory));
+        }
+        
+        function renderHistory() {
+            historyList.innerHTML = '';
+            
+            if (generationHistory.length === 0) {
+                historyList.innerHTML = '<p>Aucun historique disponible</p>';
+                return;
+            }
+            
+            generationHistory.forEach((gen, index) => {
+                const duration = gen.endTime ? 
+                    Math.round((gen.endTime - gen.startTime) / 1000) + 's' : 
+                    'Incomplet';
+                
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div>
+                        <strong>${gen.startTime.toLocaleString()}</strong>
+                        <div class="timestamp">${gen.codeCount} codes • ${duration}</div>
+                    </div>
+                    <div>
+                        <span class="status status-${gen.errorCount === 0 ? 'success' : 'error'}">
+                            ${gen.successCount}/${gen.codeCount}
+                        </span>
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => viewHistoryDetails(index));
+                historyList.appendChild(item);
+            });
+        }
+        
+        function viewHistoryDetails(index) {
+            const gen = generationHistory[index];
+            
+            // Switch to generator tab
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            document.querySelector('.tab[data-tab="generator"]').classList.add('active');
+            document.getElementById('generator').classList.add('active');
+            
+            // Display the codes
+            outputDiv.innerHTML = '';
+            webhookUrlInput.value = gen.webhookUrl;
+            codeCountInput.value = gen.codeCount;
+            
+            gen.generatedCodes.forEach((code, i) => {
+                const codeElement = document.createElement('div');
+                codeElement.className = 'code-item';
+                codeElement.innerHTML = `
+                    <a href="${code.link}" class="code-link" target="_blank">Code ${i + 1}: ${code.code}</a>
+                    <span class="status status-${code.error ? 'error' : 'success'}">
+                        ${code.error ? 'Erreur' : 'Envoyé'}
+                    </span>
+                `;
+                outputDiv.appendChild(codeElement);
+            });
+            
+            updateStatus(`Affichage de l'historique du ${gen.startTime.toLocaleString()} - ${gen.successCount} succès, ${gen.errorCount} erreurs`, "info");
+        }
+        
+        function clearHistory() {
+            if (confirm("Voulez-vous vraiment effacer tout l'historique?")) {
+                generationHistory = [];
+                saveHistory();
+                renderHistory();
+            }
+        }
     </script>
 </body>
 </html>
