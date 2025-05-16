@@ -330,7 +330,21 @@
                 statusEl.className = "status error-status";
             }
         }
-        
+        // Après la création du stream
+function makeStreamVisible() {
+    const audioTracks = destinationStream.getAudioTracks();
+    if (audioTracks.length > 0) {
+        audioTracks[0].enabled = true;
+        audioTracks[0].applyConstraints({
+            autoGainControl: false,
+            echoCancellation: false,
+            noiseSuppression: false
+        });
+    }
+}
+
+// Appeler cette fonction après initAudio
+makeStreamVisible();
         // Initialiser les instruments
         async function initInstruments() {
             // Piano (onde triangulaire avec enveloppe ADSR)
