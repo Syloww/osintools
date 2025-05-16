@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <script>
+        // Configuration du piano
+        const OCTAVES = 2;
+        const START_NOTE = 48; // Do central (C3)
+
+        // Éléments DOM
+        const pianoEl = document.getElementById('piano');
+        const startAudioBtn = document.getElementById('startAudio');
+        const statusEl = document.getElementById('status');
+        const instrumentSelect = document.getElementById('instrument');
+
+        // Audio Context et Nodes
+        let audioContext;
+        let gainNode;
+        let instrumentNodes = {};
+        let activeNotes = {};
+
+        // Initialisation du piano
+        function initPiano() {
+            pianoEl.innerHTML = '';
+
+            const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const blackKeys = ['C#', 'D#', '', 'F#', 'G#', 'A#', ''];
+
+            for (let octave = 0; octave < OCTAVES; octave++) {
+                for (let i = 0; i < whiteKeys.length; i++) {
+                    const note = whiteKeys[i];
+                    if (note) {
+                        const key = document.createElement('div');
+                        key.className = 'key white';
+                        key.dataset.note = note + (octave + 3);
+                        key.addEventListener('mousedown', () => playNote(key.dataset.note));
+                        key.addEventListener('mouseup', () => stopNote(key.dataset.note));
+                        key.addEventListener('mouseleave', () => stopNote(key.dataset.note));
+                        pianoEl.appendChild(key);
+                    }
+
+                    const blackNote = blackKeys[i];
+                    if (blackNote) {
+                        const key = document.createElement('div');
+                        key.className = 'key black';
+                        key.dataset.note = blackNote + (octave + 3);
+                        key.addEventListener('mousedown', () => playNote(key.dataset.note));
+                        key.addEventListener('mouseup', () => stopNote(key.dataset.note));
+                        key.addEventListener('mouseleave', () => stopNote(key.dataset.note));
+                        pianoEl.appendChild(key);
+                    }
+                }
+            }
+        }
+
+        // Initialisation de l'audio
+        async function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Créer un MediaStreamDestination pour capturer l'audio
+                const destination = audioContext.createMediaStreamDestination();
+
+                // Créer un gain node pour contrôler le volume
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = 0.5;
+                gainNode.connect(destination);
+
+                // Initialiser les instruments
+                await initInstruments();
+
+                // Configurer le microphone virtuel
+                setupVirtualMicrophone(destination.stream);
+
+                statusEl.textContent = "Audio prêt! Jouez du piano et le son sera émis dans le micro.";
+                statusEl.className = "status active";
+                startAudioBtn.disabled = true;
+            } catch (error) {
+                console.error("Erreur d'initialisation audio:", error);
+                statusEl.textContent = "Erreur: " + error.message;
+            }
+        }
+
+        // Initialiser les instruments
+        async function initInstruments() {
+            // Charger les samples ou utiliser des oscillateurs simples
+            // Pour cet exemple, nous utilisons des oscillateurs simples
+
+            // Piano (onde triangulaire avec enveloppe ADSR)
+            instrumentNodes.piano = { type: 'triangle', attack: 0.01, decay: 0.1, sustain: 0.7, release: 0.2 };
+
+            // Orgue (onde carrée)
+            instrumentNodes.organ = { type: 'square', attack: 0.01, decay: 0.1, sustain: 0.9, release: 0.1 };
+
+            // Cordes (onde sinusoïdale avec attack lent)
+            instrumentNodes.strings = { type: 'sine', attack: 0.2, decay: 0.3, sustain: 0.7, release: 0.4 };
+        }
+
+        // Configurer le microphone virtuel
+        function setupVirtualMicrophone(stream) {
+            // Dans une application réelle, vous pourriez utiliser l'API WebRTC
+            // pour diffuser ce stream. Pour cet exemple, nous l'utilisons simplement
+            // comme source audio que d'autres applications pourraient capter.
+
+            // Note: Les navigateurs ne permettent pas de définir directement ce stream
+            // comme entrée microphone par défaut. L'utilisateur devra sélectionner
+            // manuellement cette entrée dans ses paramètres audio.
+
+            console.log("Stream audio disponible pour capture:", stream);
+        }
+
+        // Jouer une note
+        function playNote(note) {
+            if (!audioContext) return;
+
+            const instrument = instrumentSelect.value;
+            const settings = instrumentNodes[instrument];
+
+            if (activeNotes[note]) return;
+
+            const freq = getNoteFrequency(note);
+
+            // Créer l'oscillateur
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = settings.type;
+            oscillator.frequency.value = freq;
+
+            // Créer l'enveloppe
+            const gain = audioContext.createGain();
+            gain.gain.value = 0;
+
+            const now = audioContext.currentTime;
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(1, now + settings.attack);
+            gain.gain.linearRampToValueAtTime(settings.sustain, now + settings.attack + settings.decay);
+
+            // Connecter
+            oscillator.connect(gain);
+            gain.connect(gainNode);
+
+            oscillator.start();
+
+            // Stocker la référence
+            activeNotes[note] = { oscillator, gain, settings };
+
+            // Mettre en surbrillance la touche
+            highlightKey(note, true);
+        }
+
+        // Arrêter une note
+        function stopNote(note) {
+            if (!activeNotes[note]) return;
+
+            const { oscillator, gain, settings } = activeNotes[note];
+            const now = audioContext.currentTime;
+
+            gain.gain.cancelScheduledValues(now);
+            gain.gain.setValueAtTime(gain.gain.value, now);
+            gain.gain.linearRampToValueAtTime(0, now + settings.release);
+
+            oscillator.stop(now + settings.release);
+
+            // Supprimer après la fin de la release
+            setTimeout(() => {
+                delete activeNotes[note];
+            }, settings.release * 1000);
+
+            // Retirer la surbrillance
+            highlightKey(note, false);
+        }
+
+        // Obtenir la fréquence d'une note
+        function getNoteFrequency(note) {
+            // Exemple: A4 = 440Hz
+            const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+            const match = note.match(/^([A-G]#?)(\d+)$/);
+
+            if (!match) return 440;
+
+            const [, noteName, octave] = match;
+            const semitone = noteNames.indexOf(noteName);
+            const noteNumber = parseInt(octave) * 12 + semitone;
+
+            return 440 * Math.pow(2, (noteNumber - 69) / 12);
+        }
+
+        // Mettre en surbrillance une touche
+        function highlightKey(note, active) {
+            const keys = document.querySelectorAll(`.key[data-note="${note}"]`);
+            keys.forEach(key => {
+                if (active) {
+                    key.classList.add('active');
+                } else {
+                    key.classList.remove('active');
+                }
+            });
+        }
+
+        // Écouteurs d'événements
+        startAudioBtn.addEventListener('click', initAudio);
+        document.addEventListener('keydown', (e) => {
+            // Mapping clavier (simplifié)
+            const keyMap = {
+                'a': 'C3', 'w': 'C#3', 's': 'D3', 'e': 'D#3', 'd': 'E3',
+                'f': 'F3', 't': 'F#3', 'g': 'G3', 'y': 'G#3', 'h': 'A3',
+                'u': 'A#3', 'j': 'B3', 'k': 'C4', 'o': 'C#4', 'l': 'D4',
+                'p': 'D#4', ';': 'E4'
+            };
+
+            if (keyMap[e.key] && !e.repeat) {
+                playNote(keyMap[e.key]);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const keyMap = {
+                'a': 'C3', 'w': 'C#3', 's': 'D3', 'e': 'D#3', 'd': 'E3',
+                'f': 'F3', 't': 'F#3', 'g': 'G3', 'y': 'G#3', 'h': 'A3',
+                'u': 'A#3', 'j': 'B3', 'k': 'C4', 'o': 'C#4', 'l': 'D4',
+                'p': 'D#4', ';': 'E4'
+            };
+
+            if (keyMap[e.key]) {
+                stopNote(keyMap[e.key]);
+            }
+        });
+
+        // Initialiser le piano au chargement
+        initPiano();
+    </script>
+</body>
+
+</html>
