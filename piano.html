@@ -1,39 +1,270 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Piano MIDI Virtuel - Sortie Micro</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        
+        .piano-container {
+            background-color: #34495e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .piano {
+            display: flex;
+            justify-content: center;
+            position: relative;
+            height: 200px;
+            user-select: none;
+        }
+        
+        .key {
+            border: 1px solid #2c3e50;
+            box-sizing: border-box;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.1s;
+        }
+        
+        .white {
+            background-color: white;
+            width: 50px;
+            height: 200px;
+            z-index: 1;
+            border-radius: 0 0 5px 5px;
+        }
+        
+        .white.active {
+            background-color: #ecf0f1;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(2px);
+        }
+        
+        .black {
+            background-color: #2c3e50;
+            width: 30px;
+            height: 120px;
+            margin-left: -15px;
+            margin-right: -15px;
+            z-index: 2;
+            border-radius: 0 0 5px 5px;
+        }
+        
+        .black.active {
+            background-color: #1a252f;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            transform: translateY(2px);
+        }
+        
+        .controls {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        select, input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+            font-size: 16px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .active-status {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .error-status {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .instructions {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            margin-top: 30px;
+            color: #7f8c8d;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .white {
+                width: 30px;
+                height: 150px;
+            }
+            
+            .black {
+                width: 20px;
+                height: 90px;
+                margin-left: -10px;
+                margin-right: -10px;
+            }
+            
+            .piano {
+                height: 150px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-
+    <header>
+        <h1>Piano MIDI Virtuel</h1>
+        <p class="description">Jouez du piano virtuel et envoyez le son dans votre micro pour l'utiliser avec d'autres applications</p>
+    </header>
+    
+    <div class="piano-container">
+        <div class="piano" id="piano"></div>
+    </div>
+    
+    <div class="controls">
+        <button id="startAudio">Démarrer l'Audio</button>
+        
+        <select id="instrument">
+            <option value="piano">Piano</option>
+            <option value="organ">Orgue</option>
+            <option value="strings">Cordes</option>
+            <option value="synth">Synthétiseur</option>
+        </select>
+        
+        <label for="volume">Volume:</label>
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5">
+    </div>
+    
+    <div class="status" id="status">
+        Cliquez sur "Démarrer l'Audio" pour commencer.
+    </div>
+    
+    <div class="instructions">
+        <h3>Comment utiliser ce piano comme entrée micro:</h3>
+        <ol>
+            <li>Cliquez sur "Démarrer l'Audio" pour activer le piano</li>
+            <li>Dans l'application où vous voulez utiliser le son (Zoom, Discord, etc.)</li>
+            <li>Allez dans les paramètres audio</li>
+            <li>Sélectionnez "Piano MIDI Virtuel" comme entrée microphone</li>
+            <li>Jouez du piano et le son sera capté par l'application!</li>
+        </ol>
+    </div>
+    
+    <footer>
+        Piano MIDI Virtuel - Utilise l'API Web Audio pour créer une entrée micro virtuelle
+    </footer>
+    
     <script>
         // Configuration du piano
         const OCTAVES = 2;
         const START_NOTE = 48; // Do central (C3)
-
+        
         // Éléments DOM
         const pianoEl = document.getElementById('piano');
         const startAudioBtn = document.getElementById('startAudio');
         const statusEl = document.getElementById('status');
         const instrumentSelect = document.getElementById('instrument');
-
+        const volumeControl = document.getElementById('volume');
+        
         // Audio Context et Nodes
         let audioContext;
         let gainNode;
+        let destinationStream;
         let instrumentNodes = {};
         let activeNotes = {};
-
+        
         // Initialisation du piano
         function initPiano() {
             pianoEl.innerHTML = '';
-
+            
             const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
             const blackKeys = ['C#', 'D#', '', 'F#', 'G#', 'A#', ''];
-
+            
             for (let octave = 0; octave < OCTAVES; octave++) {
                 for (let i = 0; i < whiteKeys.length; i++) {
                     const note = whiteKeys[i];
@@ -46,7 +277,7 @@
                         key.addEventListener('mouseleave', () => stopNote(key.dataset.note));
                         pianoEl.appendChild(key);
                     }
-
+                    
                     const blackNote = blackKeys[i];
                     if (blackNote) {
                         const key = document.createElement('div');
@@ -60,138 +291,240 @@
                 }
             }
         }
-
+        
         // Initialisation de l'audio
         async function initAudio() {
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
+                
                 // Créer un MediaStreamDestination pour capturer l'audio
                 const destination = audioContext.createMediaStreamDestination();
-
+                destinationStream = destination.stream;
+                
                 // Créer un gain node pour contrôler le volume
                 gainNode = audioContext.createGain();
-                gainNode.gain.value = 0.5;
+                gainNode.gain.value = volumeControl.value;
                 gainNode.connect(destination);
-
+                
+                // Mettre à jour le volume quand le contrôle change
+                volumeControl.addEventListener('input', () => {
+                    gainNode.gain.value = volumeControl.value;
+                });
+                
                 // Initialiser les instruments
                 await initInstruments();
-
+                
                 // Configurer le microphone virtuel
                 setupVirtualMicrophone(destination.stream);
-
+                
                 statusEl.textContent = "Audio prêt! Jouez du piano et le son sera émis dans le micro.";
-                statusEl.className = "status active";
+                statusEl.className = "status active-status";
                 startAudioBtn.disabled = true;
+                
+                // Activer le clavier
+                document.addEventListener('keydown', handleKeyDown);
+                document.addEventListener('keyup', handleKeyUp);
             } catch (error) {
                 console.error("Erreur d'initialisation audio:", error);
                 statusEl.textContent = "Erreur: " + error.message;
+                statusEl.className = "status error-status";
             }
         }
-
+        
         // Initialiser les instruments
         async function initInstruments() {
-            // Charger les samples ou utiliser des oscillateurs simples
-            // Pour cet exemple, nous utilisons des oscillateurs simples
-
             // Piano (onde triangulaire avec enveloppe ADSR)
-            instrumentNodes.piano = { type: 'triangle', attack: 0.01, decay: 0.1, sustain: 0.7, release: 0.2 };
-
+            instrumentNodes.piano = { 
+                type: 'triangle', 
+                attack: 0.01, 
+                decay: 0.1, 
+                sustain: 0.7, 
+                release: 0.2,
+                filter: { type: 'lowpass', frequency: 2000, Q: 1 }
+            };
+            
             // Orgue (onde carrée)
-            instrumentNodes.organ = { type: 'square', attack: 0.01, decay: 0.1, sustain: 0.9, release: 0.1 };
-
+            instrumentNodes.organ = { 
+                type: 'square', 
+                attack: 0.01, 
+                decay: 0.1, 
+                sustain: 0.9, 
+                release: 0.1 
+            };
+            
             // Cordes (onde sinusoïdale avec attack lent)
-            instrumentNodes.strings = { type: 'sine', attack: 0.2, decay: 0.3, sustain: 0.7, release: 0.4 };
+            instrumentNodes.strings = { 
+                type: 'sine', 
+                attack: 0.2, 
+                decay: 0.3, 
+                sustain: 0.7, 
+                release: 0.4,
+                vibrato: { speed: 5, amount: 0.2 }
+            };
+            
+            // Synthétiseur (onde en dents de scie avec filtre)
+            instrumentNodes.synth = {
+                type: 'sawtooth',
+                attack: 0.05,
+                decay: 0.2,
+                sustain: 0.6,
+                release: 0.3,
+                filter: { type: 'lowpass', frequency: 1200, Q: 1.5, envelope: { attack: 0.1, decay: 0.3, sustain: 0.5, release: 0.5 } }
+            };
         }
-
+        
         // Configurer le microphone virtuel
         function setupVirtualMicrophone(stream) {
             // Dans une application réelle, vous pourriez utiliser l'API WebRTC
             // pour diffuser ce stream. Pour cet exemple, nous l'utilisons simplement
             // comme source audio que d'autres applications pourraient capter.
-
+            
             // Note: Les navigateurs ne permettent pas de définir directement ce stream
             // comme entrée microphone par défaut. L'utilisateur devra sélectionner
             // manuellement cette entrée dans ses paramètres audio.
-
+            
             console.log("Stream audio disponible pour capture:", stream);
+            
+            // Pour Chrome/Edge, nous pouvons créer un MediaRecorder pour garder le stream actif
+            if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm')) {
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                mediaRecorder.start();
+                
+                // Garder le stream actif en enregistrant de petits chunks
+                setInterval(() => {
+                    if (mediaRecorder.state === 'recording') {
+                        mediaRecorder.requestData();
+                    }
+                }, 1000);
+            }
         }
-
+        
         // Jouer une note
         function playNote(note) {
             if (!audioContext) return;
-
+            
             const instrument = instrumentSelect.value;
             const settings = instrumentNodes[instrument];
-
+            
             if (activeNotes[note]) return;
-
+            
             const freq = getNoteFrequency(note);
-
+            
             // Créer l'oscillateur
             const oscillator = audioContext.createOscillator();
             oscillator.type = settings.type;
             oscillator.frequency.value = freq;
-
+            
+            // Ajouter du vibrato si défini
+            if (settings.vibrato) {
+                const vibrato = audioContext.createOscillator();
+                vibrato.frequency.value = settings.vibrato.speed;
+                
+                const vibratoGain = audioContext.createGain();
+                vibratoGain.gain.value = settings.vibrato.amount * freq;
+                
+                vibrato.connect(vibratoGain);
+                vibratoGain.connect(oscillator.frequency);
+                vibrato.start();
+                
+                activeNotes[note].vibrato = vibrato;
+                activeNotes[note].vibratoGain = vibratoGain;
+            }
+            
             // Créer l'enveloppe
             const gain = audioContext.createGain();
             gain.gain.value = 0;
-
+            
             const now = audioContext.currentTime;
             gain.gain.setValueAtTime(0, now);
             gain.gain.linearRampToValueAtTime(1, now + settings.attack);
             gain.gain.linearRampToValueAtTime(settings.sustain, now + settings.attack + settings.decay);
-
-            // Connecter
-            oscillator.connect(gain);
+            
+            // Créer un filtre si défini
+            let filter;
+            if (settings.filter) {
+                filter = audioContext.createBiquadFilter();
+                filter.type = settings.filter.type;
+                filter.frequency.value = settings.filter.frequency;
+                if (settings.filter.Q) filter.Q.value = settings.filter.Q;
+                
+                // Enveloppe du filtre si définie
+                if (settings.filter.envelope) {
+                    filter.frequency.setValueAtTime(settings.filter.frequency * 2, now);
+                    filter.frequency.exponentialRampToValueAtTime(settings.filter.frequency, now + settings.filter.envelope.attack);
+                }
+                
+                oscillator.connect(filter);
+                filter.connect(gain);
+            } else {
+                oscillator.connect(gain);
+            }
+            
             gain.connect(gainNode);
-
+            
             oscillator.start();
-
+            
             // Stocker la référence
-            activeNotes[note] = { oscillator, gain, settings };
-
+            activeNotes[note] = { oscillator, gain, settings, filter };
+            
             // Mettre en surbrillance la touche
             highlightKey(note, true);
         }
-
+        
         // Arrêter une note
         function stopNote(note) {
             if (!activeNotes[note]) return;
-
-            const { oscillator, gain, settings } = activeNotes[note];
+            
+            const { oscillator, gain, settings, vibrato, vibratoGain, filter } = activeNotes[note];
             const now = audioContext.currentTime;
-
+            
+            // Arrêter le vibrato si présent
+            if (vibrato) {
+                vibrato.stop();
+            }
+            if (vibratoGain) {
+                vibratoGain.disconnect();
+            }
+            
+            // Appliquer l'enveloppe de release
             gain.gain.cancelScheduledValues(now);
             gain.gain.setValueAtTime(gain.gain.value, now);
             gain.gain.linearRampToValueAtTime(0, now + settings.release);
-
+            
+            // Appliquer la release du filtre si présent
+            if (filter && settings.filter && settings.filter.envelope) {
+                filter.frequency.cancelScheduledValues(now);
+                filter.frequency.setValueAtTime(filter.frequency.value, now);
+                filter.frequency.exponentialRampToValueAtTime(settings.filter.frequency * 2, now + settings.filter.envelope.release);
+            }
+            
+            // Arrêter l'oscillateur après la release
             oscillator.stop(now + settings.release);
-
+            
             // Supprimer après la fin de la release
             setTimeout(() => {
                 delete activeNotes[note];
             }, settings.release * 1000);
-
+            
             // Retirer la surbrillance
             highlightKey(note, false);
         }
-
+        
         // Obtenir la fréquence d'une note
         function getNoteFrequency(note) {
             // Exemple: A4 = 440Hz
             const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
             const match = note.match(/^([A-G]#?)(\d+)$/);
-
+            
             if (!match) return 440;
-
+            
             const [, noteName, octave] = match;
             const semitone = noteNames.indexOf(noteName);
             const noteNumber = parseInt(octave) * 12 + semitone;
-
+            
             return 440 * Math.pow(2, (noteNumber - 69) / 12);
         }
-
+        
         // Mettre en surbrillance une touche
         function highlightKey(note, active) {
             const keys = document.querySelectorAll(`.key[data-note="${note}"]`);
@@ -203,10 +536,9 @@
                 }
             });
         }
-
-        // Écouteurs d'événements
-        startAudioBtn.addEventListener('click', initAudio);
-        document.addEventListener('keydown', (e) => {
+        
+        // Gestion des touches du clavier
+        function handleKeyDown(e) {
             // Mapping clavier (simplifié)
             const keyMap = {
                 'a': 'C3', 'w': 'C#3', 's': 'D3', 'e': 'D#3', 'd': 'E3',
@@ -214,28 +546,30 @@
                 'u': 'A#3', 'j': 'B3', 'k': 'C4', 'o': 'C#4', 'l': 'D4',
                 'p': 'D#4', ';': 'E4'
             };
-
+            
             if (keyMap[e.key] && !e.repeat) {
                 playNote(keyMap[e.key]);
             }
-        });
-
-        document.addEventListener('keyup', (e) => {
+        }
+        
+        function handleKeyUp(e) {
             const keyMap = {
                 'a': 'C3', 'w': 'C#3', 's': 'D3', 'e': 'D#3', 'd': 'E3',
                 'f': 'F3', 't': 'F#3', 'g': 'G3', 'y': 'G#3', 'h': 'A3',
                 'u': 'A#3', 'j': 'B3', 'k': 'C4', 'o': 'C#4', 'l': 'D4',
                 'p': 'D#4', ';': 'E4'
             };
-
+            
             if (keyMap[e.key]) {
                 stopNote(keyMap[e.key]);
             }
-        });
-
+        }
+        
+        // Écouteurs d'événements
+        startAudioBtn.addEventListener('click', initAudio);
+        
         // Initialiser le piano au chargement
         initPiano();
     </script>
 </body>
-
 </html>
